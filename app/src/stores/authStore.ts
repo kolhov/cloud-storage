@@ -5,7 +5,6 @@ import type {Tables} from "@/types/database.types.ts";
 import {usePageStore} from "@/stores/pages.ts";
 import {supabase} from "@/lib/supabase/supabaseClient.ts";
 
-
 export const useAuthStore = defineStore('auth-store', () => {
   const user = ref<null | User>(null);
   const isTrackAuthChangesSet = ref(false);

@@ -14,25 +14,25 @@ import {
 } from '@/components/ui/table'
 import { Icon } from '@iconify/vue'
 
-usePageStore().pageData.title = 'Projects';
-const files: Ref<Files | null> = ref(null);
-const folders: Ref<Folders | null> = ref(null);
+const files: Ref<Files | null> = ref(null)
+const folders: Ref<Folders | null> = ref(null)
 
-async function getAllFiles(){
-  const {data, error, status} = await filesQuery();
+async function getAllFiles() {
+  const { data, error, status } = await filesQuery()
 
-  if (error) useErrorStore().setError({error, customCode: status});
-  files.value = data;
-}
-async function getAllFolders(){
-  const {data, error, status} = await foldersQuery();
-
-  if (error) useErrorStore().setError({error, customCode: status});
-  folders.value = data;
+  if (error) useErrorStore().setError({ error, customCode: status })
+  files.value = data
 }
 
-await getAllFiles();
-await getAllFolders();
+async function getAllFolders() {
+  const { data, error, status } = await foldersQuery()
+
+  if (error) useErrorStore().setError({ error, customCode: status })
+  folders.value = data
+}
+
+await getAllFiles()
+await getAllFolders()
 </script>
 
 <template>
@@ -41,28 +41,35 @@ await getAllFolders();
       <TableRow>
         <TableHead class="w-auto">Name</TableHead>
         <TableHead class="w-[150px]">Size</TableHead>
-        <TableHead class="w-[50px]"><Icon icon="akar-icons:more-vertical"/></TableHead>
+        <TableHead class="w-[50px]">
+          <Icon icon="akar-icons:more-vertical" />
+        </TableHead>
       </TableRow>
     </TableHeader>
+
     <TableBody>
-      <!-- folders  -->
+      <!-- folders first -->
       <TableRow v-for="folder in folders" :key="folder.id">
-        <TableCell class="font-medium">
-          <TableFileName :name="folder.name" mime="folder" :is-public="folder.public" />
-        </TableCell>
-        <TableCell></TableCell>
-        <TableCell class="text-right">
-          <Icon icon="akar-icons:more-vertical"/>
-        </TableCell>
+          <TableCell class="font-medium p-0">
+            <RouterLink class="hover:bg-muted h-full block p-4" :to="`folder/${folder.id}`">
+            <TableFileName :name="folder.name" mime="folder" :is-public="folder.public" />
+            </RouterLink>
+          </TableCell>
+          <TableCell></TableCell>
+          <TableCell class="text-right">
+            <Icon icon="akar-icons:more-vertical" />
+          </TableCell>
+
       </TableRow>
+
       <!-- files   -->
       <TableRow v-for="file in files" :key="file.id">
         <TableCell class="font-medium">
           <TableFileName :name="file.name" :mime="file.mime" :is-public="file.public" />
         </TableCell>
-        <TableCell>{{file.size}}</TableCell>
+        <TableCell>{{ file.size }}</TableCell>
         <TableCell class="text-right">
-          <Icon icon="akar-icons:more-vertical"/>
+          <Icon icon="akar-icons:more-vertical" />
         </TableCell>
       </TableRow>
     </TableBody>

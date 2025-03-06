@@ -1,9 +1,10 @@
 import {supabase} from "@/lib/supabase/supabaseClient.ts";
 
-export const filesQuery = (folder: string | null = null) => {
+export const filesQuery = (userid: string, folder: string | null = null) => {
   const query = supabase
     .from('files')
-    .select();
+    .select()
+    .eq('owner', userid);
   if (folder) {
     return query.eq('folder', folder)
   } else {
@@ -11,10 +12,11 @@ export const filesQuery = (folder: string | null = null) => {
   }
 }
 
-export const foldersQuery = (folder: string | null = null) => {
+export const foldersQuery = (userid: string, folder: string | null = null) => {
   const query = supabase
     .from('folders')
-    .select();
+    .select()
+    .eq('owner', userid);
   if (folder){
     return query.eq('folder', folder);
   } else {
@@ -22,7 +24,34 @@ export const foldersQuery = (folder: string | null = null) => {
   }
 }
 
+export const sharedFoldersQuery = (folder: string) => {
+  return supabase.from('folders')
+    .select()
+    .eq('public', true)
+    .eq('folder', folder);
+}
 
+export const sharedFilesQuery = (folder: string) => {
+  return supabase.from('files')
+    .select()
+    .eq('public', true)
+    .eq('folder', folder);
+}
+
+export const sharedSingleFileQuery = (file: string) => {
+  return supabase.from('files')
+    .select(`
+      id,
+      name,
+      mime,
+      public,
+      created_at,
+      folder,
+      size
+    `)
+    .eq('public', true)
+    .eq('id', file);
+}
 
 
 
