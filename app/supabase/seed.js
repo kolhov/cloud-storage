@@ -23,19 +23,17 @@ const logStep = (stepMessage) => {
 
 const PrimaryTestUserExists = async () => {
   logStep('Checking if primary test user exists...')
-  const { data, error } = await supabase
-    .from('auth.users')
-    .select('id, email')
-    .eq('email', testingUserEmail)
-    .single()
+  const { data, error } = await supabase.auth.admin.listUsers();
 
   if (error) {
+    console.log(error)
     console.log('Primary test user not found. Will create one.')
     return false
   }
 
+  const user = data.users.find(u => u.email === testingUserEmail);
   logStep('Primary test user is found.')
-  return data?.id
+  return user?.id
 }
 
 const createPrimaryTestUser = async () => {
@@ -63,71 +61,81 @@ const createPrimaryTestUser = async () => {
 
   if (data) {
     const userId = data.user.id
-    await supabase.from('profiles').insert({
-      id: userId,
-      full_name: firstName + ' ' + lastName,
-      username: userName,
-      bio: 'The main testing account',
-      avatar_url: `https://i.pravatar.cc/150?u=${data.user.id}`
-    })
-
     logStep('Primary test user created successfully.')
     return userId
   }
 }
 
-const seedProjects = async (numEntries, userId) => {
-  logStep('Seeding projects...')
-  const projects = []
-
-  for (let i = 0; i < numEntries; i++) {
-    const name = faker.lorem.words(3)
-
-    projects.push({
-      name: name,
-      slug: name.toLocaleLowerCase().replace(/ /g, '-'),
-      description: faker.lorem.paragraphs(2),
-      status: faker.helpers.arrayElement(['in-progress', 'completed']),
-      collaborators: faker.helpers.arrayElements([userId])
-    })
-  }
+const seedFolders = async (userId) => {
+  logStep('Seeding folders...')
+  const folders = [{
+    name: 'folder1',
+    public: false,
+    owner: userId,
+  },{
+    name: 'folder2',
+    public: true,
+    owner: userId,
+  }]
 
   const { data, error } = await supabase
-    .from('projects')
-    .insert(projects)
+    .from('folders')
+    .insert(folders)
     .select('id')
 
-  if (error) return logErrorAndExit('Projects', error)
+  if (error) return logErrorAndExit('Folders', error)
 
-  logStep('Projects seeded successfully.')
+  logStep('Folders seeded successfully.')
 
   return data
 }
 
-const seedTasks = async (numEntries, projectsIds, userId) => {
-  logStep('Seeding tasks...')
-  const tasks = []
+const seedNestedFolder = async (folderId, ownerId) => {
+  logStep('Seeding nested folders...')
+
+  const { data, error } = await supabase
+    .from('folders')
+    .insert({
+      name: 'folder-inside-folder1',
+      public: false,
+      owner: ownerId,
+      folder: folderId
+    })
+    .select('id')
+
+  if (error) return logErrorAndExit('Folders', error)
+
+  logStep('Nested folders seeded successfully.')
+
+  return data
+}
+
+const seedFiles = async (numEntries, foldersIds, userId) => {
+  logStep('Seeding files...')
+  const files = []
 
   for (let i = 0; i < numEntries; i++) {
-    tasks.push({
-      name: faker.lorem.words(3),
-      status: faker.helpers.arrayElement(['in-progress', 'completed']),
-      description: faker.lorem.paragraph(),
-      due_date: faker.date.future(),
-      profile_id: userId,
-      project_id: faker.helpers.arrayElement(projectsIds),
-      collaborators: faker.helpers.arrayElements([userId])
+    const mime = 'application/pdf'
+    const fileExt = faker.system.fileExt(mime)
+
+    files.push({
+      name: 'decoy ' + faker.system.commonFileName(fileExt),
+      folder: faker.helpers.arrayElement([null, ...foldersIds]),
+      public: false,
+      size: 100,
+      mime: mime,
+      owner: userId
     })
   }
 
   const { data, error } = await supabase
-    .from('tasks')
-    .insert(tasks)
+    .from('files')
+    .insert(files)
     .select('id')
 
-  if (error) return logErrorAndExit('Tasks', error)
+  if (error) return logErrorAndExit('Files', error)
 
-  logStep('Tasks seeded successfully.')
+  logStep('Files seeded successfully.')
 
   return data
 }
@@ -144,10 +152,11 @@ const seedDatabase = async (numEntriesPerTable) => {
     userId = testUserId
   }
 
-  const projectsIds = (await seedProjects(numEntriesPerTable, userId)).map(
-    (project) => project.id
+  const foldersIds = (await seedFolders(userId)).map(
+    (folder) => folder.id
   )
-  await seedTasks(numEntriesPerTable, projectsIds, userId)
+  await seedNestedFolder(foldersIds[0], userId)
+  await seedFiles(numEntriesPerTable, foldersIds, userId)
 }
 
 const numEntriesPerTable = 10
