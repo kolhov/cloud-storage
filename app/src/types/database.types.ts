@@ -9,113 +9,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      profiles: {
+      files: {
         Row: {
-          avatar_url: string | null
-          bio: string | null
           created_at: string
-          full_name: string
+          folder: string | null
           id: string
-          mode: string
-          username: string
+          mime: string
+          name: string
+          owner: string
+          public: boolean | null
+          size: number | null
         }
         Insert: {
-          avatar_url?: string | null
-          bio?: string | null
           created_at?: string
-          full_name: string
-          id: string
-          mode?: string
-          username: string
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          full_name?: string
+          folder?: string | null
           id?: string
-          mode?: string
-          username?: string
-        }
-        Relationships: []
-      }
-      projects: {
-        Row: {
-          collaborators: string[]
-          created_at: string
-          description: string | null
-          id: number
+          mime: string
           name: string
-          slug: string
-          status: Database["public"]["Enums"]["current_status"]
-        }
-        Insert: {
-          collaborators?: string[]
-          created_at?: string
-          description?: string | null
-          id?: never
-          name: string
-          slug: string
-          status?: Database["public"]["Enums"]["current_status"]
+          owner: string
+          public?: boolean | null
+          size?: number | null
         }
         Update: {
-          collaborators?: string[]
           created_at?: string
-          description?: string | null
-          id?: never
+          folder?: string | null
+          id?: string
+          mime?: string
           name?: string
-          slug?: string
-          status?: Database["public"]["Enums"]["current_status"]
-        }
-        Relationships: []
-      }
-      tasks: {
-        Row: {
-          collaborators: string[]
-          created_at: string
-          description: string
-          due_date: string | null
-          id: number
-          name: string
-          profile_id: string
-          project_id: number | null
-          status: Database["public"]["Enums"]["current_status"]
-        }
-        Insert: {
-          collaborators?: string[]
-          created_at?: string
-          description: string
-          due_date?: string | null
-          id?: never
-          name: string
-          profile_id: string
-          project_id?: number | null
-          status?: Database["public"]["Enums"]["current_status"]
-        }
-        Update: {
-          collaborators?: string[]
-          created_at?: string
-          description?: string
-          due_date?: string | null
-          id?: never
-          name?: string
-          profile_id?: string
-          project_id?: number | null
-          status?: Database["public"]["Enums"]["current_status"]
+          owner?: string
+          public?: boolean | null
+          size?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "tasks_profile_id_fkey"
-            columns: ["profile_id"]
+            foreignKeyName: "files_folder_fkey"
+            columns: ["folder"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "folders"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      folders: {
+        Row: {
+          created_at: string
+          folder: string | null
+          id: string
+          name: string
+          owner: string
+          public: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          folder?: string | null
+          id?: string
+          name: string
+          owner: string
+          public?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          folder?: string | null
+          id?: string
+          name?: string
+          owner?: string
+          public?: boolean | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "tasks_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "folders_folder_fkey"
+            columns: ["folder"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "folders"
             referencedColumns: ["id"]
           },
         ]
@@ -128,7 +93,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      current_status: "in-progress" | "completed" | "pending"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never

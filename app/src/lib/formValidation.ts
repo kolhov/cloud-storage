@@ -4,9 +4,9 @@ export function emailValidation(email: string){
 
   if (!trimmedEmail) return [];
   const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
-  const isValidformat = emailRegex.test(trimmedEmail);
+  const isValidFormat = emailRegex.test(trimmedEmail);
 
-  if (!isValidformat) errors.push('Not a valid email format');
+  if (!isValidFormat) errors.push('Not a valid email format');
 
   return errors;
 }

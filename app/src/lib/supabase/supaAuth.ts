@@ -9,17 +9,6 @@ export async function register(formData: RegisterForm){
 
   if (error) return  console.log("Signup err: ", error);
 
-  if (data.user) {
-    const {error} = await supabase.from('profiles').insert({
-      id: data.user.id,
-      username: formData.username,
-      full_name: formData.firstName + " " + formData.lastName,
-      bio: ''
-    })
-
-    if (error) return console.log('Profiles err: ', error)
-  }
-
   return true
 }
 
