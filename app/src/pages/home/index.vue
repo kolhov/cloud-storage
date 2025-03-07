@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { usePageStore } from '@/stores/pages.ts'
 import { ref, type Ref } from 'vue'
 import { useErrorStore } from '@/stores/errorStore.ts'
 import { filesQuery, foldersQuery } from '@/lib/supabase/supabaseQueries.ts'
@@ -13,19 +12,24 @@ import {
   TableRow
 } from '@/components/ui/table'
 import { Icon } from '@iconify/vue'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/authStore.ts'
 
+const { user } = storeToRefs(useAuthStore());
 const files: Ref<Files | null> = ref(null)
 const folders: Ref<Folders | null> = ref(null)
 
 async function getAllFiles() {
-  const { data, error, status } = await filesQuery()
+  if (!user.value) return
+  const { data, error, status } = await filesQuery(user?.value.id)
 
   if (error) useErrorStore().setError({ error, customCode: status })
   files.value = data
 }
 
 async function getAllFolders() {
-  const { data, error, status } = await foldersQuery()
+  if (!user.value) return
+  const { data, error, status } = await foldersQuery(user?.value.id)
 
   if (error) useErrorStore().setError({ error, customCode: status })
   folders.value = data

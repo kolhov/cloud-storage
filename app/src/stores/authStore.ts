@@ -1,8 +1,6 @@
 import {acceptHMRUpdate, defineStore} from "pinia";
 import {ref} from "vue";
 import type {Session, User} from "@supabase/supabase-js";
-import type {Tables} from "@/types/database.types.ts";
-import {usePageStore} from "@/stores/pages.ts";
 import {supabase} from "@/lib/supabase/supabaseClient.ts";
 
 export const useAuthStore = defineStore('auth-store', () => {

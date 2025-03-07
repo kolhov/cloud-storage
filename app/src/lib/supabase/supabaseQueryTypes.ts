@@ -9,6 +9,6 @@ import {
 
 export type Folders = QueryData<ReturnType<typeof foldersQuery>>;
 export type Files = QueryData<ReturnType<typeof filesQuery>>;
-export type sharedFile = QueryData<ReturnType<typeof sharedSingleFileQuery>>;
-export type sharedFolders = QueryData<ReturnType<typeof sharedFoldersQuery>>;
-export type sharedFiles = QueryData<ReturnType<typeof sharedFilesQuery>>;
+export type SharedFile = QueryData<ReturnType<typeof sharedSingleFileQuery>>;
+export type SharedFolders = QueryData<ReturnType<typeof sharedFoldersQuery>>;
+export type SharedFiles = QueryData<ReturnType<typeof sharedFilesQuery>>;

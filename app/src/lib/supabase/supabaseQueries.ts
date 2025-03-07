@@ -38,7 +38,7 @@ export const sharedFilesQuery = (folder: string) => {
     .eq('folder', folder);
 }
 
-export const sharedSingleFileQuery = (file: string) => {
+export const sharedSingleFileQuery = (id: string) => {
   return supabase.from('files')
     .select(`
       id,
@@ -50,7 +50,8 @@ export const sharedSingleFileQuery = (file: string) => {
       size
     `)
     .eq('public', true)
-    .eq('id', file);
+    .eq('id', id)
+    .single();
 }
 
 
