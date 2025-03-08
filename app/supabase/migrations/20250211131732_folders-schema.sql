@@ -6,6 +6,7 @@ create table folders (
     name text not null,
     public bool default false not null,
     folder uuid references folders (id) on delete cascade,
-    owner uuid references auth.users (id) on delete cascade not null
+    owner uuid references auth.users (id) on delete cascade not null,
+    icon text default 'akar-icons:folder' not null
 );
 

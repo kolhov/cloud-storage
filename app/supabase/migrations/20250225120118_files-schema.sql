@@ -8,5 +8,6 @@ create table files (
     public boolean default false not null,
     size bigint,
     mime text not null,
-    owner uuid references auth.users (id) on delete cascade not null
+    owner uuid references auth.users (id) on delete cascade not null,
+    icon text default 'akar-icons:file' not null
 );

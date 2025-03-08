@@ -124,7 +124,8 @@ const seedFiles = async (numEntries, foldersIds, userId) => {
       public: false,
       size: 100,
       mime: mime,
-      owner: userId
+      owner: userId,
+      icon: 'akar-icons:file'
     })
   }
 

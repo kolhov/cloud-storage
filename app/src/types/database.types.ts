@@ -13,31 +13,34 @@ export type Database = {
         Row: {
           created_at: string
           folder: string | null
+          icon: string
           id: string
           mime: string
           name: string
           owner: string
-          public: boolean | null
+          public: boolean
           size: number | null
         }
         Insert: {
           created_at?: string
           folder?: string | null
+          icon?: string
           id?: string
           mime: string
           name: string
           owner: string
-          public?: boolean | null
+          public?: boolean
           size?: number | null
         }
         Update: {
           created_at?: string
           folder?: string | null
+          icon?: string
           id?: string
           mime?: string
           name?: string
           owner?: string
-          public?: boolean | null
+          public?: boolean
           size?: number | null
         }
         Relationships: [
@@ -54,26 +57,29 @@ export type Database = {
         Row: {
           created_at: string
           folder: string | null
+          icon: string
           id: string
           name: string
           owner: string
-          public: boolean | null
+          public: boolean
         }
         Insert: {
           created_at?: string
           folder?: string | null
+          icon?: string
           id?: string
           name: string
           owner: string
-          public?: boolean | null
+          public?: boolean
         }
         Update: {
           created_at?: string
           folder?: string | null
+          icon?: string
           id?: string
           name?: string
           owner?: string
-          public?: boolean | null
+          public?: boolean
         }
         Relationships: [
           {
