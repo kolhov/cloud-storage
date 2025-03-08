@@ -46,6 +46,9 @@ async function getCurrentStorage(){
 await getCurrentStorage();
 
 watch(() => route.params, async () => {
+  files.value = null;
+  folders.value = null;
+
   await getCurrentStorage();
 })
 </script>
@@ -62,7 +65,7 @@ watch(() => route.params, async () => {
       </TableRow>
     </TableHeader>
 
-    <TableBody>
+    <TableBody v-if="files && folders">
       <!-- folders first -->
       <TableRow v-for="folder in folders" :key="folder.id">
         <TableCell class="font-medium p-0">

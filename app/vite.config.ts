@@ -16,7 +16,7 @@ export default defineConfig({
   plugins: [
     VueRouter(),
     vue(),
-    vueDevTools(),
+    //vueDevTools(),
   ],
   resolve: {
     alias: {
