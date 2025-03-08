@@ -19,7 +19,7 @@ const formData = ref({
 
 async function signIn(){
   const {error} = await login(formData.value)
-  if (!error) return  router.push('/')
+  if (!error) return  router.push('/home')
 
   handleServerError(error);
 }

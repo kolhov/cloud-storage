@@ -24,6 +24,11 @@ export const foldersQuery = (userid: string, folder: string | null = null) => {
   }
 }
 
+export const getAllFoldersQuery = (userid: string) => supabase
+  .from('folders')
+  .select()
+  .eq('owner', userid);
+
 export const sharedFoldersQuery = (folder: string) => {
   return supabase.from('folders')
     .select()

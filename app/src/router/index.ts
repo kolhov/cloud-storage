@@ -11,7 +11,7 @@ router.beforeEach(async (to, from) => {
   const authStore = useAuthStore();
   await authStore.getSession();
 
-  const isAuthRoute = ['/login', '/register'].includes(to.path);
+  const isAuthRoute = ['/login', '/register', '/shared'].includes(to.path);
 
   if (!authStore.user && !isAuthRoute){
     return {
