@@ -67,7 +67,8 @@ watch(() => route.params, async () => {
 
     <TableBody v-if="files && folders">
       <!-- folders first -->
-      <TableRow v-for="folder in folders" :key="folder.id">
+      <!-- draggable mb? -->
+      <TableRow v-for="folder in folders" :key="folder.id" >
         <TableCell class="font-medium p-0">
           <RouterLink class="hover:bg-muted h-full block p-4" :to="`/folder/${folder.id}`">
             <TableFileName :name="folder.name" mime="folder" :is-public="folder.public" />
@@ -77,7 +78,6 @@ watch(() => route.params, async () => {
         <TableCell class="text-right">
           <Icon icon="akar-icons:more-vertical" />
         </TableCell>
-
       </TableRow>
 
       <!-- files   -->
