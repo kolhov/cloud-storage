@@ -1,20 +1,18 @@
 import express from "express";
 import dotenv from "dotenv";
-import multer from "multer";
 import cors from "cors";
+import { multerUpload } from '@/libs/multerSettings';
 
 dotenv.config();
-
 const app = express();
 const port = process.env.PORT;
-const upload = multer({ dest: 'storage/' });
 
 app.use(cors({
-  origin: process.env.FE_URL, // Разрешаем запросы только с этого источника
-  methods: ['GET', 'POST'], // Разрешаем методы
+  origin: process.env.FE_URL,
+  methods: ['GET', 'POST'],
 }));
 
-app.post('/upload', upload.single('file'), (req, res) => {
+app.post('/upload', multerUpload.single('file'), (req, res) => {
   console.log(req.file);
 });
 
