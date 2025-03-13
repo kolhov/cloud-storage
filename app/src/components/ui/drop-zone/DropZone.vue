@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useFileUploader } from '@/composables/fileUploader.ts'
+import { useFileUploader } from '@/stores/fileUploader.ts'
 
 const isShow = ref(false)
 let inActiveTimeout: any = null
@@ -16,8 +16,7 @@ function hideBlock() {
   }, 50)
 }
 
-//TODO extract to loading component
-const { isLoaded, isLoading, uploadFiles } = useFileUploader()
+const {uploadFiles} = useFileUploader();
 function dropFileHandler(ev: Event) {
   isShow.value = false
 

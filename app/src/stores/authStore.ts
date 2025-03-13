@@ -5,14 +5,17 @@ import {supabase} from "@/lib/supabase/supabaseClient.ts";
 
 export const useAuthStore = defineStore('auth-store', () => {
   const user = ref<null | User>(null);
+  const accessToken = ref<null | string>(null);
   const isTrackAuthChangesSet = ref(false);
 
   async function setAuth(session: null | Session = null){
     if (!session){
+      accessToken.value = null;
       user.value = null;
       return
     }
 
+    accessToken.value = session.access_token;
     user.value = session.user;
   }
 
@@ -34,6 +37,7 @@ export const useAuthStore = defineStore('auth-store', () => {
 
   return {
     user,
+    accessToken,
     setAuth,
     getSession,
     trackAuthChanges
