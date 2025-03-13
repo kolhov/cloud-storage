@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { multerUpload } from '@/libs/multerSettings';
+import { multerUpload } from '@/lib/multerSettings';
 
 dotenv.config();
 const app = express();

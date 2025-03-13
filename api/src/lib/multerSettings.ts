@@ -4,7 +4,8 @@ import { Request } from 'express'
 import { ExtendedRequest } from '@/types/express.types'
 
 const storage = multer.diskStorage({
-  destination: async function (req: ExtendedRequest, file, cb) {
+  destination: function (req: ExtendedRequest, file, cb) {
+    //TODO создать папку
     cb(null, `/storage/${req.userUuid}`)
   },
   filename: function (req, file, cb) {
@@ -12,7 +13,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const fileFilter = async (req: ExtendedRequest, file: Express.Multer.File, cb: FileFilterCallback) => {
+const fileFilter = (req: ExtendedRequest, file: Express.Multer.File, cb: FileFilterCallback) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return cb(new Error('Unauthorized'));
@@ -23,13 +24,14 @@ const fileFilter = async (req: ExtendedRequest, file: Express.Multer.File, cb: F
     return cb(new Error('Forbidden'));
   }
 
-  const {data, error} = await supabase.auth.getUser(token);
-  if (error){
-    return cb(new Error(error.message));
-  }
-
-  req.userUuid = data.user?.id;
-  cb(null, true);
+  supabase.auth.getUser(token)
+    .then( ({data, error}) => {
+      if (error){
+        return cb(new Error(error.message));
+      }
+      req.userUuid = data.user?.id;
+      cb(null, true);
+  }).catch(err => cb(new Error(err)));
 };
 
 export const multerUpload = multer({ storage, fileFilter });
