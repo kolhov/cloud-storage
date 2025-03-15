@@ -3,6 +3,8 @@ import axios from 'axios'
 import { useAuthStore } from '@/stores/authStore.ts'
 import * as fs from 'node:fs'
 import { defineStore } from 'pinia'
+import { mimeToIcon } from '@/lib/iconManager.ts'
+import mime from 'mime';
 
 export const useFileUploader = defineStore('file-uploader', () => {
   const isLoading = ref<boolean | null>(null);
@@ -10,9 +12,19 @@ export const useFileUploader = defineStore('file-uploader', () => {
   // TODO add axios on upload progress
   const loadingFiles = ref<{progressBar: number}>();
 
-  async function simpleUpload(file: File, accessToken: string) {
+  async function simpleUpload(file: File, accessToken: string, folderId: string | null) {
+    let fileMime = file.type === ''
+      ? mime.getType(file.name)
+      : file.type;
+    if (!fileMime) fileMime = '';
+
     let formData = new FormData();
     formData.append('file', file);
+    formData.append('folderId', folderId ?? 'null');
+    formData.append('icon', mimeToIcon(fileMime));
+    formData.append('mime', fileMime);
+
+    //console.log(fileMime);
     return await axios.post(url, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -21,10 +33,11 @@ export const useFileUploader = defineStore('file-uploader', () => {
     });
   }
 
-  async function streamUpload(file: File, accessToken: string) {
+  async function streamUpload(file: File, accessToken: string, folderId: string | null) {
     return await axios.post(url, {
-      name: 'file',
-      file: fs.createReadStream(file.webkitRelativePath)
+      file: fs.createReadStream(file.webkitRelativePath),
+      folderId: folderId ?? 'null',
+      icon: mimeToIcon(file.type)
     }, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -38,15 +51,16 @@ export const useFileUploader = defineStore('file-uploader', () => {
     });
   }
 
-  async function uploadFile(file: File) {
+  async function uploadFile(file: File, folderId: string | null) {
     const {accessToken} = useAuthStore();
     if (!accessToken) return
     let response = null;
     isLoading.value = true;
 
-    if (file.size <= 5 * 1024 * 1024) response = await simpleUpload(file, accessToken);
-    else response = await streamUpload(file, accessToken);
+    if (file.size <= 5 * 1024 * 1024) response = await simpleUpload(file, accessToken, folderId);
+    else response = await streamUpload(file, accessToken, folderId);
 
+    console.log(response);
     return response;
   }
 
@@ -54,6 +68,7 @@ export const useFileUploader = defineStore('file-uploader', () => {
     if (entry.isFile) {
       return entry as FileSystemFileEntry;
     } else {
+      // TODO add folder
       const reader = (entry as FileSystemDirectoryEntry).createReader();
 
       const entries: FileSystemEntry[] = await new Promise(resolve =>
@@ -73,7 +88,7 @@ export const useFileUploader = defineStore('file-uploader', () => {
     }
   }
 
-  async function uploadFiles(data: DataTransferItemList) {
+  async function uploadFiles(data: DataTransferItemList, folderId: string | null) {
     const entries: FileSystemFileEntry[] = [];
 
     for (const item of [...data]) {
@@ -88,7 +103,7 @@ export const useFileUploader = defineStore('file-uploader', () => {
     const files = await Promise.all(entries.map(file => getFile(file)));
     if (files.length > 0) {
       await Promise.all(files.map((file) => {
-        if (file) uploadFile(file)
+        if (file) uploadFile(file, folderId)
       }))
 
       isLoading.value = false;

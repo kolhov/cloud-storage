@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useFileUploader } from '@/stores/fileUploader.ts'
+import { useRoute } from 'vue-router'
 
 const isShow = ref(false)
+const route = useRoute();
 let inActiveTimeout: any = null
 
 function showBlock() {
@@ -21,7 +23,7 @@ function dropFileHandler(ev: Event) {
   isShow.value = false
 
   const data = (ev as InputEvent).dataTransfer?.items ?? null
-  if (data) uploadFiles(data);
+  if (data) uploadFiles(data, route.params.uuid ?? null);
 }
 </script>
 

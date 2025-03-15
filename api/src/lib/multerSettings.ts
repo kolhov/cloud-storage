@@ -1,19 +1,26 @@
 import multer, { FileFilterCallback } from 'multer'
 import { supabase } from '@/lib/supabase/supabaseClient'
 import { Request } from 'express'
-import { ExtendedRequest } from '@/types/express.types'
+import * as path from 'node:path'
+import * as fs from 'node:fs'
 
 const storage = multer.diskStorage({
-  destination: function (req: ExtendedRequest, file, cb) {
-    //TODO создать папку
-    cb(null, `/storage/${req.userUuid}`)
+  destination: function (req, file, cb) {
+    const uploadPath = path.join(process.cwd(), "storage", req.body.userUuid as string);
+
+    if (!fs.existsSync(uploadPath)){
+      fs.mkdirSync(uploadPath, {recursive: true});
+    }
+    cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    cb(null, file.fieldname);
+    const fileUuid = crypto.randomUUID();
+    req.body.fileUuid = fileUuid;
+    cb(null, fileUuid);
   }
 });
 
-const fileFilter = (req: ExtendedRequest, file: Express.Multer.File, cb: FileFilterCallback) => {
+const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return cb(new Error('Unauthorized'));
@@ -29,7 +36,7 @@ const fileFilter = (req: ExtendedRequest, file: Express.Multer.File, cb: FileFil
       if (error){
         return cb(new Error(error.message));
       }
-      req.userUuid = data.user?.id;
+      req.body.userUuid = data.user?.id;
       cb(null, true);
   }).catch(err => cb(new Error(err)));
 };
