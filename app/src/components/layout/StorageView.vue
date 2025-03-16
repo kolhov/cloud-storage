@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { ref, type Ref, watch } from 'vue'
-import { useErrorStore } from '@/stores/errorStore.ts'
-import { filesQuery, foldersQuery } from '@/lib/supabase/supabaseQueries.ts'
-import type { Files, Folders } from '@/lib/supabase/supabaseQueryTypes.ts'
+import { watch } from 'vue'
 import {
   Table, TableBody,
   TableCell,
@@ -13,43 +10,16 @@ import {
 } from '@/components/ui/table'
 import { Icon } from '@iconify/vue'
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/stores/authStore.ts'
 import { useRoute } from 'vue-router'
+import { useStorageStore } from '@/stores/storageStore.ts'
 
-const { user } = storeToRefs(useAuthStore());
-const files: Ref<Files | null> = ref(null);
-const folders: Ref<Folders | null> = ref(null);
+const {files, folders} = storeToRefs(useStorageStore());
+const {setCurrentFolderId} = useStorageStore();
 const route = useRoute();
 
-async function getAllFiles(folder?: string | null) {
-  if (!user.value) return;
-  const { data, error, status } = await filesQuery(user?.value.id, folder);
-
-  if (error) useErrorStore().setError({ error, customCode: status });
-  files.value = data;
-}
-
-async function getAllFolders(folder?: string | null) {
-  if (!user.value) return;
-  const { data, error, status } = await foldersQuery(user?.value.id, folder);
-
-  if (error) useErrorStore().setError({ error, customCode: status });
-  folders.value = data;
-}
-
-async function getCurrentStorage(){
-  let folderUuid = route.params.uuid as string || null;
-  await getAllFiles(folderUuid);
-  await getAllFolders(folderUuid);
-}
-
-await getCurrentStorage();
-
+await setCurrentFolderId(route.params?.uuid as string || null);
 watch(() => route.params, async () => {
-  files.value = null;
-  folders.value = null;
-
-  await getCurrentStorage();
+  await setCurrentFolderId(route.params?.uuid as string || null);
 })
 </script>
 

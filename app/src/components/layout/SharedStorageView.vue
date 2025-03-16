@@ -23,7 +23,7 @@ import { useRoute } from 'vue-router'
 
 const files: Ref<Files | null> = ref(null);
 const folders: Ref<Folders | null> = ref(null);
-const route = useRoute();
+const route = useRoute("/shared/folder/[uuid]");
 
 async function getAllFiles(folder: string) {
   const { data, error, status } = await sharedFilesQuery(folder);
@@ -41,7 +41,7 @@ async function getAllFolders(folder: string) {
 
 async function getCurrentStorage(){
   let folderUuid = route.params.uuid as string;
-  if (!folderUuid) return useErrorStore().setError({error: 'Page not found', customCode: 404})
+
   await getAllFiles(folderUuid);
   await getAllFolders(folderUuid);
 }

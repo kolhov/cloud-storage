@@ -41,4 +41,8 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallb
   }).catch(err => cb(new Error(err)));
 };
 
-export const multerUpload = multer({ storage, fileFilter });
+export const multerUpload = multer({
+  storage,
+  fileFilter,
+  limits: {fileSize: 100 * 1024 * 1024}
+});

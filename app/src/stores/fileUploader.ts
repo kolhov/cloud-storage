@@ -1,14 +1,16 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/authStore.ts'
-import * as fs from 'node:fs'
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { mimeToIcon } from '@/lib/iconManager.ts'
 import mime from 'mime';
+import { folderQuery, insertFolderQuery } from '@/lib/supabase/supabaseQueries.ts'
+import { useErrorStore } from '@/stores/errorStore.ts'
+import { ensureFolder } from '@/lib/supabase/ensureFolder.ts'
 
 export const useFileUploader = defineStore('file-uploader', () => {
   const isLoading = ref<boolean | null>(null);
-  const url = import.meta.env.VITE_STORAGE_ENDPOINT as string + '/upload';
+  const url = import.meta.env.VITE_STORAGE_ENDPOINT as string;
   // TODO add axios on upload progress
   const loadingFiles = ref<{progressBar: number}>();
 
@@ -25,7 +27,7 @@ export const useFileUploader = defineStore('file-uploader', () => {
     formData.append('mime', fileMime);
 
     //console.log(fileMime);
-    return await axios.post(url, formData, {
+    return await axios.post(url + '/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         'Authorization': `Bearer ${accessToken}`
@@ -33,48 +35,33 @@ export const useFileUploader = defineStore('file-uploader', () => {
     });
   }
 
-  async function streamUpload(file: File, accessToken: string, folderId: string | null) {
-    return await axios.post(url, {
-      file: fs.createReadStream(file.webkitRelativePath),
-      folderId: folderId ?? 'null',
-      icon: mimeToIcon(file.type)
-    }, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${accessToken}`
-      },
-      onUploadProgress: function (progressEvent) {
-        if (!progressEvent.total) return
-        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        //TODO loadingFiles.value.progressBar = percent;
-      },
-    });
-  }
-
   async function uploadFile(file: File, folderId: string | null) {
-    const {accessToken} = useAuthStore();
-    if (!accessToken) return
+    const {accessToken} = storeToRefs(useAuthStore());
+    if (!accessToken.value) return
     let response = null;
     isLoading.value = true;
 
-    if (file.size <= 5 * 1024 * 1024) response = await simpleUpload(file, accessToken, folderId);
-    else response = await streamUpload(file, accessToken, folderId);
+    response = await simpleUpload(file, accessToken.value, folderId);
 
     console.log(response);
     return response;
   }
 
-  async function processEntry(entry: FileSystemEntry, path = '') {
+  async function processEntry(entry: FileSystemEntry, path = '', folderUuid: string | null = null) {
     if (entry.isFile) {
+      //TODO вернуть фолдер id
       return entry as FileSystemFileEntry;
     } else {
-      // TODO add folder
-      const reader = (entry as FileSystemDirectoryEntry).createReader();
+      console.log('It\'s folder')
+      const folder = entry as FileSystemDirectoryEntry;
+      let newFolderUuid: string | null = await ensureFolder(folder, folderUuid);
+
+      const reader = folder.createReader();
 
       const entries: FileSystemEntry[] = await new Promise(resolve =>
         reader.readEntries(resolve));
       const fileEntries: FileSystemFileEntry[] = (await Promise.all(entries.map(nestedEntry =>
-        processEntry(nestedEntry, path + entry.name + "/")))).flat();
+        processEntry(nestedEntry, path + entry.name + "/", newFolderUuid)))).flat();
       return fileEntries;
     }
   }

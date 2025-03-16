@@ -1,0 +1,30 @@
+import { useAuthStore } from '@/stores/authStore.ts'
+import { useErrorStore } from '@/stores/errorStore.ts'
+import { folderQuery, insertFolderQuery } from '@/lib/supabase/supabaseQueries.ts'
+
+export async function ensureFolder(folderEntry: FileSystemDirectoryEntry, parentFolderUuid: string | null){
+  const {user} = useAuthStore();
+  let uuid: string | null = parentFolderUuid;
+  if (!user){
+    useErrorStore().setError({ error:'Unauthorised', customCode: 400});
+  } else {
+    const currentFolder = await folderQuery(user.id, folderEntry.name, parentFolderUuid);
+    if (currentFolder.error != null){
+      console.log(currentFolder.error);
+    } else if (currentFolder.data === null) {
+      console.log('Creating folder: ', folderEntry.name);
+      const {data, error} = await insertFolderQuery({
+        name: folderEntry.name,
+        owner: user.id,
+        folder: parentFolderUuid
+      });
+      if (error){
+        console.log(error);
+      }
+      uuid = data?.id ?? parentFolderUuid;
+    } else {
+      uuid = currentFolder.data.id ?? parentFolderUuid;
+    }
+  }
+  return uuid;
+}

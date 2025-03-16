@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import StorageView from '@/components/layout/StorageView.vue'
+import SharedStorageView from '@/components/layout/SharedStorageView.vue'
 </script>
 
 <template>
-  <StorageView />
+  <SharedStorageView />
 </template>

@@ -1,26 +1,47 @@
 import {supabase} from "@/lib/supabase/supabaseClient.ts";
+import type { Tables } from '@/types/database.types.ts'
+import type { FolderInsert } from '@/types/database.insert.types.ts'
 
-export const filesQuery = (userid: string, folder: string | null = null) => {
+export const filesQuery = (userid: string, folder?: string | null | undefined) => {
   const query = supabase
     .from('files')
     .select()
     .eq('owner', userid);
   if (folder) {
-    return query.eq('folder', folder)
+    return query.eq('folder', folder);
+  } else if (folder === null){
+    return query.is('folder', null);
   } else {
-    return query.is('folder', null)
+    return query;
   }
 }
 
-export const foldersQuery = (userid: string, folder: string | null = null) => {
+export const foldersQuery = (userid: string, folder: string | null | undefined) => {
   const query = supabase
     .from('folders')
     .select()
     .eq('owner', userid);
   if (folder){
     return query.eq('folder', folder);
-  } else {
+  } else if (folder === null){
     return query.is('folder', null);
+  } else {
+    return query;
+  }
+}
+
+export const folderQuery = (userid: string, name: string, folder: string | null = null) => {
+  const query = supabase
+    .from('folders')
+    .select()
+    .eq('owner', userid)
+    .eq('name', name);
+  if (folder){
+    return query.eq('folder', folder)
+      .maybeSingle();
+  } else {
+    return query.is('folder', null)
+      .maybeSingle();
   }
 }
 
@@ -56,6 +77,19 @@ export const sharedSingleFileQuery = (id: string) => {
     `)
     .eq('public', true)
     .eq('id', id)
+    .single();
+}
+
+export const insertFolderQuery = (folder: FolderInsert) => {
+  return supabase
+    .from('folders')
+    .insert({
+      name: folder.name,
+      folder: folder.folder,
+      owner: folder.owner,
+      isPublic: folder.public
+    } as FolderInsert)
+    .select()
     .single();
 }
 
