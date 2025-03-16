@@ -1,4 +1,4 @@
-import { defineStore, storeToRefs } from 'pinia'
+import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { filesQuery, foldersQuery } from '@/lib/supabase/supabaseQueries.ts'
 import { useErrorStore } from '@/stores/errorStore.ts'
@@ -74,6 +74,11 @@ export const useStorageStore = defineStore('storage', () => {
     sidebarFoldersTree,
     currentFolderId,
     refreshStorage,
-    setCurrentFolderId
+    setCurrentFolderId,
+    refreshFolders
   }
-})
+});
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useStorageStore, import.meta.hot))
+}

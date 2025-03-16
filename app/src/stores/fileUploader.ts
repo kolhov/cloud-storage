@@ -1,11 +1,9 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/authStore.ts'
-import { defineStore, storeToRefs } from 'pinia'
+import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia'
 import { mimeToIcon } from '@/lib/iconManager.ts'
 import mime from 'mime';
-import { folderQuery, insertFolderQuery } from '@/lib/supabase/supabaseQueries.ts'
-import { useErrorStore } from '@/stores/errorStore.ts'
 import { ensureFolder } from '@/lib/supabase/ensureFolder.ts'
 
 export const useFileUploader = defineStore('file-uploader', () => {
@@ -47,7 +45,7 @@ export const useFileUploader = defineStore('file-uploader', () => {
     return response;
   }
 
-  async function processEntry(entry: FileSystemEntry, path = '', folderUuid: string | null = null) {
+  async function processEntry(entry: FileSystemEntry, folderUuid: string | null, path = '') {
     if (entry.isFile) {
       //TODO вернуть фолдер id
       return entry as FileSystemFileEntry;
@@ -61,7 +59,7 @@ export const useFileUploader = defineStore('file-uploader', () => {
       const entries: FileSystemEntry[] = await new Promise(resolve =>
         reader.readEntries(resolve));
       const fileEntries: FileSystemFileEntry[] = (await Promise.all(entries.map(nestedEntry =>
-        processEntry(nestedEntry, path + entry.name + "/", newFolderUuid)))).flat();
+        processEntry(nestedEntry, newFolderUuid, path + entry.name + "/")))).flat();
       return fileEntries;
     }
   }
@@ -82,7 +80,7 @@ export const useFileUploader = defineStore('file-uploader', () => {
       const entry = item.webkitGetAsEntry();
       if (!entry) continue;
 
-      let fileEntry = await processEntry(entry);
+      let fileEntry = await processEntry(entry, folderId);
       if (!Array.isArray(fileEntry)) entries.push(fileEntry);
       else entries.push(...fileEntry);
     }
@@ -102,3 +100,7 @@ export const useFileUploader = defineStore('file-uploader', () => {
     uploadFiles
   }
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useFileUploader, import.meta.hot))
+}

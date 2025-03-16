@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/stores/authStore.ts'
 import { useErrorStore } from '@/stores/errorStore.ts'
 import { folderQuery, insertFolderQuery } from '@/lib/supabase/supabaseQueries.ts'
+import { useStorageStore } from '@/stores/storageStore.ts'
 
 export async function ensureFolder(folderEntry: FileSystemDirectoryEntry, parentFolderUuid: string | null){
   const {user} = useAuthStore();
@@ -20,6 +21,8 @@ export async function ensureFolder(folderEntry: FileSystemDirectoryEntry, parent
       });
       if (error){
         console.log(error);
+      } else {
+        useStorageStore().refreshFolders();
       }
       uuid = data?.id ?? parentFolderUuid;
     } else {
