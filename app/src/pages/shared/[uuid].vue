@@ -12,7 +12,7 @@ import {
   CardTitle
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { cn, convertDateFromIso } from '@/lib/utils.ts'
+import { cn, bytesToString, convertDateFromIso } from '@/lib/utils.ts'
 import { Icon } from '@iconify/vue'
 
 const route = useRoute('/shared/[uuid]');
@@ -30,6 +30,11 @@ await getFile();
 const userFriendlyDate = computed(() => {
   if (!file.value) return
   return convertDateFromIso(file.value.created_at)
+})
+
+const userFriendlySize = computed(() => {
+  if (!file.value) return
+  return bytesToString(file.value.size ?? 10)
 })
 </script>
 
@@ -53,7 +58,7 @@ const userFriendlyDate = computed(() => {
                 File size
               </p>
               <p class="text-sm text-muted-foreground">
-                {{ file.size }}
+                {{ userFriendlySize }}
               </p>
             </div>
           </div>

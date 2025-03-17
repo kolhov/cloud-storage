@@ -2,6 +2,7 @@ import type { Updater } from '@tanstack/vue-table'
 import type { Ref } from 'vue'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import bytes from 'bytes';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -23,4 +24,8 @@ export function convertDateFromIso(isoDate: string){
     hour: "2-digit",
     minute: "2-digit",
   })
+}
+
+export function bytesToString(byte: number){
+  return bytes(byte, {unitSeparator: ' '});
 }
