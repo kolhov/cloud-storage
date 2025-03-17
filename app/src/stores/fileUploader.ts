@@ -5,6 +5,8 @@ import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia'
 import { mimeToIcon } from '@/lib/iconManager.ts'
 import mime from 'mime';
 import { ensureFolder } from '@/lib/supabase/ensureFolder.ts'
+import { useStorageStore } from '@/stores/storageStore.ts'
+import type { FileSystemEntryWithId, FileWithFolderId } from '@/types/expanded.file.system.types.ts'
 
 export const useFileUploader = defineStore('file-uploader', () => {
   const isLoading = ref<boolean | null>(null);
@@ -48,9 +50,8 @@ export const useFileUploader = defineStore('file-uploader', () => {
   async function processEntry(entry: FileSystemEntry, folderUuid: string | null, path = '') {
     if (entry.isFile) {
       //TODO вернуть фолдер id
-      return entry as FileSystemFileEntry;
+      return { entry: entry as FileSystemFileEntry, folderId: folderUuid };
     } else {
-      console.log('It\'s folder')
       const folder = entry as FileSystemDirectoryEntry;
       let newFolderUuid: string | null = await ensureFolder(folder, folderUuid);
 
@@ -58,7 +59,7 @@ export const useFileUploader = defineStore('file-uploader', () => {
 
       const entries: FileSystemEntry[] = await new Promise(resolve =>
         reader.readEntries(resolve));
-      const fileEntries: FileSystemFileEntry[] = (await Promise.all(entries.map(nestedEntry =>
+      const fileEntries: FileSystemEntryWithId[] = (await Promise.all(entries.map(nestedEntry =>
         processEntry(nestedEntry, newFolderUuid, path + entry.name + "/")))).flat();
       return fileEntries;
     }
@@ -74,7 +75,7 @@ export const useFileUploader = defineStore('file-uploader', () => {
   }
 
   async function uploadFiles(data: DataTransferItemList, folderId: string | null) {
-    const entries: FileSystemFileEntry[] = [];
+    const entries: FileSystemEntryWithId[] = [];
 
     for (const item of [...data]) {
       const entry = item.webkitGetAsEntry();
@@ -85,18 +86,27 @@ export const useFileUploader = defineStore('file-uploader', () => {
       else entries.push(...fileEntry);
     }
 
-    const files = await Promise.all(entries.map(file => getFile(file)));
+    const files: FileWithFolderId[] = await Promise.all(entries.map(async (entry) => {
+      return {
+        file: await getFile(entry.entry),
+        folderId: entry.folderId
+      } as FileWithFolderId
+    }));
+
     if (files.length > 0) {
       await Promise.all(files.map((file) => {
-        if (file) uploadFile(file, folderId)
+        if (file.file) return uploadFile(file.file, file.folderId);
+        return Promise.resolve();
       }))
 
       isLoading.value = false;
+      await useStorageStore().refreshFiles();
     }
   }
 
   return {
     isLoading,
+    loadingFiles,
     uploadFiles
   }
 });

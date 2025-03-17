@@ -75,7 +75,8 @@ export const useStorageStore = defineStore('storage', () => {
     currentFolderId,
     refreshStorage,
     setCurrentFolderId,
-    refreshFolders
+    refreshFolders,
+    refreshFiles
   }
 });
 
