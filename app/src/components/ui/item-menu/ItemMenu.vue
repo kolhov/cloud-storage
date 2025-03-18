@@ -28,15 +28,15 @@ import {
   updateFolderPublic
 } from '@/lib/fileManager.ts'
 
+const prop = defineProps<{
+  item: Files[0] | Folder,
+}>();
+
 enum dialog {
   delete,
   moveTo,
   rename
 }
-
-const prop = defineProps<{
-  item: Files[0] | Folder,
-}>();
 
 const currentDialog = ref(dialog.delete);
 
@@ -115,31 +115,21 @@ function makeItemPrivate(){
 
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Share link</DialogTitle>
+        <DialogTitle>Are you sure?</DialogTitle>
         <DialogDescription>
-          Anyone who has this link will be able to view this.
+          This action cannot be undone. Are you sure you want to permanently
+          delete this {{item?.size? 'file' : 'folder with all files inside'}} from your drive?
         </DialogDescription>
       </DialogHeader>
-      <div class="flex items-center space-x-2">
-        <div class="grid flex-1 gap-2">
-          <Label for="link" class="sr-only">
-            Link
-          </Label>
-          <Input
-            id="link"
-            default-value="https://shadcn-vue.com/docs/installation"
-            read-only
-          />
-        </div>
-        <Button type="submit" size="sm" class="px-3">
-          <span class="sr-only">Copy</span>
-          <Icon icon="akar-icons:copy" class="w-4 h-4" />
-        </Button>
-      </div>
-      <DialogFooter class="sm:justify-start">
+      <DialogFooter class="justify-end">
         <DialogClose as-child>
           <Button type="button" variant="secondary">
-            Close
+            No
+          </Button>
+        </DialogClose>
+        <DialogClose as-child>
+          <Button type="button" variant="destructive" @click="deleteItem">
+            Delete
           </Button>
         </DialogClose>
       </DialogFooter>

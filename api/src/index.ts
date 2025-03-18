@@ -36,6 +36,10 @@ app.post('/upload', multerUpload.single('file'), async (req, res) => {
   res.sendStatus(200);
 });
 
+app.get('/download', (req, res) => {
+
+})
+
 app.delete('/file', async (req, res ) => {
   const userId = await headerToUser(req);
   if (!userId){
@@ -56,6 +60,7 @@ app.delete('/file', async (req, res ) => {
     console.error('Delete file query error: ', error);
     return;
   }
+  res.sendStatus(200);
 });
 
 app.delete('/folder', async (req, res ) => {
@@ -89,6 +94,7 @@ app.delete('/folder', async (req, res ) => {
     console.error('Delete folder query error: ', del.error);
     return;
   }
+  res.sendStatus(200);
 });
 
 app.listen(port, () => {
