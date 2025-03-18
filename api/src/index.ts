@@ -3,11 +3,10 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { multerUpload } from '@/lib/multerSettings';
 import { deleteFileQuery, deleteFolderQuery, filesQuery, insertFileQuery } from '@/lib/supabase/supabaseQueries'
-import { supabase } from '@/lib/supabase/supabaseClient'
-import { getHeaderToken } from '@/lib/utils'
+import { headerToUser } from '@/lib/utils'
 import * as fs from 'node:fs'
 import path from 'node:path'
-import { FilesQuery } from '@/types/db.queries.types'
+
 
 dotenv.config();
 const app = express();
@@ -38,17 +37,11 @@ app.post('/upload', multerUpload.single('file'), async (req, res) => {
 });
 
 app.delete('/file', async (req, res ) => {
-  const token = getHeaderToken(req);
-  if (!token) {
+  const userId = await headerToUser(req);
+  if (!userId){
     res.sendStatus(403);
     return;
   }
-  const user = await supabase.auth.getUser(token)
-  if (user.error) {
-    res.sendStatus(403);
-    return;
-  }
-  const userId = user.data.user.id;
 
   const filePath = path.join(storagePath, userId, req.body.id)
   try {
@@ -66,17 +59,11 @@ app.delete('/file', async (req, res ) => {
 });
 
 app.delete('/folder', async (req, res ) => {
-  const token = getHeaderToken(req);
-  if (!token) {
+  const userId = await headerToUser(req);
+  if (!userId){
     res.sendStatus(403);
     return;
   }
-  const user = await supabase.auth.getUser(token)
-  if (user.error) {
-    res.sendStatus(403);
-    return;
-  }
-  const userId = user.data.user.id;
 
   const {data, error} = await filesQuery(userId, req.body.id);
   if (error) {

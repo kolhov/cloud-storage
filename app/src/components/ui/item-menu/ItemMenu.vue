@@ -2,7 +2,7 @@
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Icon } from '@iconify/vue'
@@ -21,10 +21,14 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { ref } from 'vue'
 import type { Files, Folder } from '@/lib/supabase/supabaseQueryTypes.ts'
-import { deleteFile, deleteFolder } from '@/lib/fileManager.ts'
+import {
+  deleteFile,
+  deleteFolder,
+  updateFilePublic,
+  updateFolderPublic
+} from '@/lib/fileManager.ts'
 
 enum dialog {
-  share,
   delete,
   moveTo,
   rename
@@ -32,17 +36,17 @@ enum dialog {
 
 const prop = defineProps<{
   item: Files[0] | Folder,
-}>()
+}>();
 
 const currentDialog = ref(dialog.delete);
 
-function setDialog(selectDialog: dialog){
+function setDialog(selectDialog: dialog) {
   currentDialog.value = selectDialog;
 }
 
-function copyLink(){
+function copyLink() {
   let link = window.location.origin;
-  if ('size' in prop.item){
+  if ('size' in prop.item) {
     link += `/shared/${prop.item.id}`;
   } else {
     link += `/shared/folder/${prop.item.id}`;
@@ -50,34 +54,57 @@ function copyLink(){
   navigator.clipboard.writeText(link);
 }
 
-function deleteItem(){
-  if ('size' in prop.item){
+function deleteItem() {
+  if ('size' in prop.item) {
     deleteFile(prop.item.id);
   } else {
     deleteFolder(prop.item.id);
   }
 }
+
+function makeItemPublic(){
+  if ('size' in prop.item) {
+    updateFilePublic(prop.item.id, true);
+  } else {
+    updateFolderPublic(prop.item.id, true);
+  }
+}
+
+function makeItemPrivate(){
+  if ('size' in prop.item) {
+    updateFilePublic(prop.item.id, false);
+  } else {
+    updateFolderPublic(prop.item.id, false);
+  }
+}
 </script>
 
 <template>
-  <Dialog >
+  <Dialog>
     <DropdownMenu :modal="false">
       <DropdownMenuTrigger asChild>
         <Icon icon="akar-icons:more-vertical" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+
         <DropdownMenuItem>Download</DropdownMenuItem>
-        <DialogTrigger asChild @click="setDialog(dialog.share)">
-          <DropdownMenuItem>
-            Manage access
-          </DropdownMenuItem>
-        </DialogTrigger>
+
+        <DropdownMenuSeparator />
+        <DropdownMenuItem v-if="item.public" @click="makeItemPrivate">
+          <span>Make private</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem v-else @click="makeItemPublic">
+          <span>Make public</span>
+        </DropdownMenuItem>
+
         <DropdownMenuItem v-if="item.public" @click="copyLink()">
-          Copy link to file
+          Copy link
         </DropdownMenuItem>
         <DropdownMenuItem v-else disabled>
-          Copy link to file
+          Copy link
         </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
         <DialogTrigger asChild @click="setDialog(dialog.delete)">
           <DropdownMenuItem>
             Delete

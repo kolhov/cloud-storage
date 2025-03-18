@@ -93,7 +93,17 @@ export const insertFolderQuery = (folder: FolderInsert) => {
     .single();
 }
 
+export const updateFilePublicQuery = (id: string, isPublic: boolean) =>
+  supabase
+    .from('files')
+    .update({ 'public': isPublic })
+    .eq('id', id);
 
+export const updateFolderPublicQuery = (id: string, isPublic: boolean) =>
+  supabase
+    .from('folders')
+    .update({ 'public': isPublic })
+    .eq('id', id);
 
 
 
