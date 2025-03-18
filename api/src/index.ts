@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { multerUpload } from '@/lib/multerSettings';
 import { insertFileQuery } from '@/lib/supabase/supabaseQueries'
+import { supabase } from '@/lib/supabase/supabaseClient'
+import { getHeaderToken } from '@/lib/utils'
 
 dotenv.config();
 const app = express();
@@ -28,6 +30,21 @@ app.post('/upload', multerUpload.single('file'), async (req, res) => {
   }
   console.log(data);
   res.sendStatus(200);
+});
+
+app.delete('/folder', async (req, res ) => {
+  const token = getHeaderToken(req);
+  if (!token) {
+    res.sendStatus(403);
+    return;
+  }
+  const { data, error } = await supabase.auth.getUser(token)
+  if (error) {
+    res.sendStatus(403);
+    return;
+  }
+
+  //TODO удалить папку, удалить запись
 });
 
 app.listen(port, () => {

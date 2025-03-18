@@ -11,6 +11,7 @@ import { Icon } from '@iconify/vue'
 import type { Files, Folders } from '@/lib/supabase/supabaseQueryTypes.ts'
 import { computed } from 'vue'
 import { bytesToString } from '@/lib/utils.ts'
+import ItemMenu from '@/components/ui/item-menu/ItemMenu.vue'
 
 const props = defineProps<{
   files: Files | null,
@@ -51,7 +52,7 @@ const formattedFiles = computed(() => {
         </TableCell>
         <TableCell></TableCell>
         <TableCell class="text-right">
-          <Icon icon="akar-icons:more-vertical" />
+          <ItemMenu :item="folder"/>
         </TableCell>
       </TableRow>
 
@@ -62,7 +63,7 @@ const formattedFiles = computed(() => {
         </TableCell>
         <TableCell>{{ file.formattedSize }}</TableCell>
         <TableCell class="text-right">
-          <Icon icon="akar-icons:more-vertical" />
+          <ItemMenu :item="file"/>
         </TableCell>
       </TableRow>
     </TableBody>

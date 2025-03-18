@@ -9,10 +9,12 @@ export async function ensureFolder(folderEntry: FileSystemDirectoryEntry, parent
   if (!user){
     useErrorStore().setError({ error:'Unauthorised', customCode: 400});
   } else {
+    // Look if folder exists
     const currentFolder = await folderQuery(user.id, folderEntry.name, parentFolderUuid);
     if (currentFolder.error != null){
       console.log(currentFolder.error);
     } else if (currentFolder.data === null) {
+      // Create new folder
       console.log('Creating folder: ', folderEntry.name);
       const {data, error} = await insertFolderQuery({
         name: folderEntry.name,

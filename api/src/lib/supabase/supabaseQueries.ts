@@ -20,3 +20,17 @@ export const insertFileQuery = (file: Express.Multer.File, req: Request, isPubli
     .select()
     .single()
 }
+
+export const deleteFileQuery = (id: string, userId: string) =>
+  supabase
+    .from('files')
+    .delete()
+    .eq('id', id)
+    .eq('owner', userId);
+
+export const deleteFolderQuery = (id: string, userId: string) =>
+  supabase
+    .from('folders')
+    .delete()
+    .eq('id', id)
+    .eq('owner', userId);
