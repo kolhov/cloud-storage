@@ -18,19 +18,31 @@ export const insertFileQuery = (file: Express.Multer.File, req: Request, isPubli
     .from('files')
     .insert(preparedFile)
     .select()
-    .single()
+    .single();
 }
 
-export const deleteFileQuery = (id: string, userId: string) =>
-  supabase
+export const deleteFileQuery = (id: string | string[], userId: string) => {
+  const query = supabase
     .from('files')
     .delete()
-    .eq('id', id)
     .eq('owner', userId);
-
+  if (Array.isArray(id)) {
+    return query.in('id', id);
+  } else {
+    return query.eq('id', id);
+  }
+}
 export const deleteFolderQuery = (id: string, userId: string) =>
   supabase
     .from('folders')
     .delete()
     .eq('id', id)
     .eq('owner', userId);
+
+export const filesQuery = (userid: string, folder: string) =>
+  supabase
+    .from('files')
+    .select()
+    .eq('owner', userid)
+    .eq('folder', folder);
+

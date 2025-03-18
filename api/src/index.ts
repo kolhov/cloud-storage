@@ -2,17 +2,22 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { multerUpload } from '@/lib/multerSettings';
-import { insertFileQuery } from '@/lib/supabase/supabaseQueries'
+import { deleteFileQuery, deleteFolderQuery, filesQuery, insertFileQuery } from '@/lib/supabase/supabaseQueries'
 import { supabase } from '@/lib/supabase/supabaseClient'
 import { getHeaderToken } from '@/lib/utils'
+import * as fs from 'node:fs'
+import path from 'node:path'
+import { FilesQuery } from '@/types/db.queries.types'
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT;
+const storagePath = path.join(process.cwd(), "storage");
 
+app.use(express.json());
 app.use(cors({
   origin: process.env.FE_URL,
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'DELETE'],
 }));
 
 app.post('/upload', multerUpload.single('file'), async (req, res) => {
@@ -32,19 +37,71 @@ app.post('/upload', multerUpload.single('file'), async (req, res) => {
   res.sendStatus(200);
 });
 
+app.delete('/file', async (req, res ) => {
+  const token = getHeaderToken(req);
+  if (!token) {
+    res.sendStatus(403);
+    return;
+  }
+  const user = await supabase.auth.getUser(token)
+  if (user.error) {
+    res.sendStatus(403);
+    return;
+  }
+  const userId = user.data.user.id;
+
+  const filePath = path.join(storagePath, userId, req.body.id)
+  try {
+    fs.rmSync(filePath);
+  } catch (err) {
+    console.error('File deletion error: ', err);
+  }
+
+  const {error} = await deleteFileQuery(req.body.id, userId);
+  if (error){
+    res.sendStatus(500);
+    console.error('Delete file query error: ', error);
+    return;
+  }
+});
+
 app.delete('/folder', async (req, res ) => {
   const token = getHeaderToken(req);
   if (!token) {
     res.sendStatus(403);
     return;
   }
-  const { data, error } = await supabase.auth.getUser(token)
-  if (error) {
+  const user = await supabase.auth.getUser(token)
+  if (user.error) {
     res.sendStatus(403);
     return;
   }
+  const userId = user.data.user.id;
 
-  //TODO удалить папку, удалить запись
+  const {data, error} = await filesQuery(userId, req.body.id);
+  if (error) {
+    res.sendStatus(500);
+    console.error('Files query error: ', error);
+    return;
+  }
+
+  if (data && data?.length > 0){
+    data.forEach((file) => {
+      const filePath = path.join(storagePath, userId, file.id);
+      try {
+        fs.rmSync(filePath);
+      } catch (err) {
+        console.error('File deletion error: ', err);
+      }
+    });
+  }
+
+  const del = await deleteFolderQuery(req.body.id, userId);
+  if (del.error){
+    res.sendStatus(500);
+    console.error('Delete folder query error: ', del.error);
+    return;
+  }
 });
 
 app.listen(port, () => {

@@ -21,10 +21,10 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { ref } from 'vue'
 import type { Files, Folder } from '@/lib/supabase/supabaseQueryTypes.ts'
+import { deleteFile, deleteFolder } from '@/lib/fileManager.ts'
 
 enum dialog {
   share,
-  copyLink,
   delete,
   moveTo,
   rename
@@ -50,6 +50,13 @@ function copyLink(){
   navigator.clipboard.writeText(link);
 }
 
+function deleteItem(){
+  if ('size' in prop.item){
+    deleteFile(prop.item.id);
+  } else {
+    deleteFolder(prop.item.id);
+  }
+}
 </script>
 
 <template>
@@ -60,7 +67,6 @@ function copyLink(){
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem>Download</DropdownMenuItem>
-
         <DialogTrigger asChild @click="setDialog(dialog.share)">
           <DropdownMenuItem>
             Manage access
@@ -72,8 +78,14 @@ function copyLink(){
         <DropdownMenuItem v-else disabled>
           Copy link to file
         </DropdownMenuItem>
+        <DialogTrigger asChild @click="setDialog(dialog.delete)">
+          <DropdownMenuItem>
+            Delete
+          </DropdownMenuItem>
+        </DialogTrigger>
       </DropdownMenuContent>
     </DropdownMenu>
+
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>Share link</DialogTitle>
