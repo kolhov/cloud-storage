@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { Files, Folder } from '@/lib/supabase/supabaseQueryTypes.ts'
 import {
   deleteFile,
@@ -63,7 +63,7 @@ function deleteItem() {
 }
 
 function makeItemPublic(){
-  if ('size' in prop.item) {
+  if (isFile) {
     updateFilePublic(prop.item.id, true);
   } else {
     updateFolderPublic(prop.item.id, true);
@@ -71,12 +71,16 @@ function makeItemPublic(){
 }
 
 function makeItemPrivate(){
-  if ('size' in prop.item) {
+  if (isFile) {
     updateFilePublic(prop.item.id, false);
   } else {
     updateFolderPublic(prop.item.id, false);
   }
 }
+
+const isFile = computed(() => {
+  return 'size' in prop.item;
+})
 </script>
 
 <template>
@@ -118,7 +122,7 @@ function makeItemPrivate(){
         <DialogTitle>Are you sure?</DialogTitle>
         <DialogDescription>
           This action cannot be undone. Are you sure you want to permanently
-          delete this {{item?.size? 'file' : 'folder with all files inside'}} from your drive?
+          delete this {{isFile? 'file' : 'folder with all files inside'}} from your drive?
         </DialogDescription>
       </DialogHeader>
       <DialogFooter class="justify-end">
