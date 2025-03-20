@@ -1,5 +1,4 @@
 import {supabase} from "@/lib/supabase/supabaseClient.ts";
-import type { Tables } from '@/types/database.types.ts'
 import type { FolderInsert } from '@/types/database.insert.types.ts'
 
 export const filesQuery = (userid: string, folder?: string | null | undefined) => {
@@ -105,6 +104,29 @@ export const updateFolderPublicQuery = (id: string, isPublic: boolean) =>
     .update({ 'public': isPublic })
     .eq('id', id);
 
+export const updateFileNameQuery = (id: string, name: string) =>
+  supabase
+    .from('files')
+    .update({ 'name': name })
+    .eq('id', id);
+
+export const updateFolderNameQuery = (id: string, name: string) =>
+  supabase
+    .from('folders')
+    .update({ 'name': name })
+    .eq('id', id);
+
+export const updateFileFolderQuery = (id: string, folderId: string) =>
+  supabase
+    .from('files')
+    .update({ 'folder': folderId })
+    .eq('id', id);
+
+export const updateFolderFolderQuery = (id: string, folderId: string) =>
+  supabase
+    .from('folders')
+    .update({ 'folder': folderId })
+    .eq('id', id);
 
 
 

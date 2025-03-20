@@ -1,7 +1,20 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/authStore.ts'
-import { updateFilePublicQuery, updateFolderPublicQuery } from '@/lib/supabase/supabaseQueries.ts'
+import {
+  updateFileNameQuery,
+  updateFolderNameQuery,
+  updateFilePublicQuery,
+  updateFolderPublicQuery,
+  updateFileFolderQuery,
+  updateFolderFolderQuery
+} from '@/lib/supabase/supabaseQueries.ts'
 import { useStorageStore } from '@/stores/storageStore.ts'
+import type { PostgrestError } from '@supabase/supabase-js'
+
+function logError(error: PostgrestError) {
+  //TODO send something to user
+  console.log(error)
+}
 
 export async function deleteFile(id: string) {
   const url = import.meta.env.VITE_STORAGE_ENDPOINT as string
@@ -14,7 +27,7 @@ export async function deleteFile(id: string) {
       id: id
     }
   });
-  useStorageStore().refreshFiles()
+  await useStorageStore().refreshFiles()
 }
 
 export async function deleteFolder(id: string) {
@@ -28,24 +41,53 @@ export async function deleteFolder(id: string) {
       id: id
     }
   })
-  useStorageStore().refreshFolders();
+  await useStorageStore().refreshFolders();
 }
 
 export async function updateFilePublic(id: string, isPublic: boolean){
   const {data, error} = await updateFilePublicQuery(id, isPublic);
   if (error) {
-    //TODO send to user something
-    console.log(error)
+    logError(error);
   }
-  useStorageStore().refreshFiles();
+  await useStorageStore().refreshFiles();
 }
 
 export async function updateFolderPublic(id: string, isPublic: boolean){
   const {data, error} = await updateFolderPublicQuery(id, isPublic);
   if (error) {
-    //TODO send to user something
-    console.log(error)
+    logError(error);
   }
-  useStorageStore().refreshFolders();
+  await useStorageStore().refreshFolders();
 }
 
+export async function updateFileName(id: string, newName: string){
+  const {data, error} = await updateFileNameQuery(id, newName);
+  if (error) {
+    logError(error);
+  }
+  await useStorageStore().refreshFiles();
+}
+
+export async function updateFolderName(id: string, newName: string){
+  const {data, error} = await updateFolderNameQuery(id, newName);
+  if (error) {
+    logError(error);
+  }
+  await useStorageStore().refreshFolders();
+}
+
+export async function updateFIleFolder(id: string, newFolderId: string){
+  const {data, error} = await updateFileFolderQuery(id, newFolderId);
+  if (error) {
+    logError(error);
+  }
+  await useStorageStore().refreshFiles();
+}
+
+export async function updateFolderFolder(id: string, newFolderId: string){
+  const {data, error} = await updateFolderFolderQuery(id, newFolderId);
+  if (error) {
+    logError(error);
+  }
+  await useStorageStore().refreshFolders();
+}

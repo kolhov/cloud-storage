@@ -2,64 +2,57 @@
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Icon } from '@iconify/vue'
 import {
-  DialogHeader,
   Dialog,
   DialogContent,
-  DialogFooter,
-  DialogDescription,
-  DialogTitle,
   DialogTrigger,
-  DialogClose
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
 import { computed, ref } from 'vue'
 import type { Files, Folder } from '@/lib/supabase/supabaseQueryTypes.ts'
 import {
-  deleteFile,
-  deleteFolder,
   updateFilePublic,
   updateFolderPublic
 } from '@/lib/fileManager.ts'
+import DialogDeleteItem from '@/components/ui/dialog-content/DialogDeleteItem.vue'
+import DialogMoveToItem from '@/components/ui/dialog-content/DialogMoveToItem.vue'
+import DialogRenameItem from '@/components/ui/dialog-content/DialogRenameItem.vue'
 
 const prop = defineProps<{
   item: Files[0] | Folder,
 }>();
 
 enum dialog {
-  delete,
-  moveTo,
-  rename
+  delete = 'delete',
+  moveTo = 'move-to',
+  rename = 'rename'
 }
 
 const currentDialog = ref(dialog.delete);
 
+const dialogComponents = {
+  [dialog.delete]: DialogDeleteItem,
+  [dialog.moveTo]: DialogMoveToItem,
+  [dialog.rename]: DialogRenameItem,
+}
+
 function setDialog(selectDialog: dialog) {
   currentDialog.value = selectDialog;
+
 }
 
 function copyLink() {
   let link = window.location.origin;
-  if ('size' in prop.item) {
+  if (isFile) {
     link += `/shared/${prop.item.id}`;
   } else {
     link += `/shared/folder/${prop.item.id}`;
   }
   navigator.clipboard.writeText(link);
-}
-
-function deleteItem() {
-  if ('size' in prop.item) {
-    deleteFile(prop.item.id);
-  } else {
-    deleteFolder(prop.item.id);
-  }
 }
 
 function makeItemPublic(){
@@ -90,8 +83,19 @@ const isFile = computed(() => {
         <Icon icon="akar-icons:more-vertical" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-
         <DropdownMenuItem>Download</DropdownMenuItem>
+
+        <DialogTrigger asChild @click="setDialog(dialog.moveTo)">
+          <DropdownMenuItem>
+            Move to...
+          </DropdownMenuItem>
+        </DialogTrigger>
+
+        <DialogTrigger asChild @click="setDialog(dialog.rename)">
+          <DropdownMenuItem>
+            Rename
+          </DropdownMenuItem>
+        </DialogTrigger>
 
         <DropdownMenuSeparator />
         <DropdownMenuItem v-if="item.public" @click="makeItemPrivate">
@@ -118,25 +122,11 @@ const isFile = computed(() => {
     </DropdownMenu>
 
     <DialogContent class="sm:max-w-md">
-      <DialogHeader>
-        <DialogTitle>Are you sure?</DialogTitle>
-        <DialogDescription>
-          This action cannot be undone. Are you sure you want to permanently
-          delete this {{isFile? 'file' : 'folder with all files inside'}} from your drive?
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter class="justify-end">
-        <DialogClose as-child>
-          <Button type="button" variant="secondary">
-            No
-          </Button>
-        </DialogClose>
-        <DialogClose as-child>
-          <Button type="button" variant="destructive" @click="deleteItem">
-            Delete
-          </Button>
-        </DialogClose>
-      </DialogFooter>
+      <component
+        :is="dialogComponents[currentDialog]"
+        :item="item"
+        :is-file="isFile"
+      />
     </DialogContent>
   </Dialog>
 </template>

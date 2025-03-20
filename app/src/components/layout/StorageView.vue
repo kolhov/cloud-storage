@@ -1,18 +1,19 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { useStorageStore } from '@/stores/storageStore.ts'
 import ContentTable from '@/components/ui/content-table/ContentTable.vue'
 
-const {files, folders} = storeToRefs(useStorageStore());
-const {setCurrentFolderId} = useStorageStore();
+const storageStore = useStorageStore();
+const {files, folders} = storeToRefs(storageStore);
 const route = useRoute();
 
-await setCurrentFolderId(route.params?.uuid as string || null);
-watch(() => route.params, async () => {
-  await setCurrentFolderId(route.params?.uuid as string || null);
-})
+const currentId = computed(() => route.params?.uuid as string || null);
+
+watch(currentId, async (newId) => {
+  await storageStore.setCurrentFolderId(newId);
+}, { immediate: true });
 </script>
 
 <template>

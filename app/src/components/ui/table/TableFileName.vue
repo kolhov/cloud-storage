@@ -2,7 +2,6 @@
 import { Icon } from '@iconify/vue'
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
-let fileIcon: string = 'akar-icons:paper';
 const props = defineProps<{
   name: string,
   icon: string,
@@ -13,8 +12,8 @@ const props = defineProps<{
 
 <template>
   <div class="flex flex-row items-center">
-    <Icon :icon="icon" class="icons mr-3"></Icon>
-    {{name}}
+    <Icon :icon="icon" class="icons mr-3" />
+    <p>{{name}}</p>
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger as-child>

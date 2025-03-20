@@ -4,6 +4,7 @@ import AppErrorPage from "@/components/AppError/AppErrorPage.vue";
 import {useErrorStore} from "@/stores/errorStore.ts";
 import {onErrorCaptured, onMounted} from "vue";
 import {useAuthStore} from "@/stores/authStore.ts";
+import { Toaster } from '@/components/ui/toast'
 
 const errorStore = useErrorStore();
 
@@ -18,6 +19,7 @@ onMounted(async () => {
 </script>
 
 <template>
+  <Toaster />
   <AuthLayout>
     <AppErrorPage v-if="errorStore.activeError" />
     <RouterView v-else v-slot="{Component, route}">
