@@ -5,24 +5,15 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/comp
 let fileIcon: string = 'akar-icons:paper';
 const props = defineProps<{
   name: string,
-  mime: string,
+  icon: string,
   isPublic: boolean
 }>();
-
-if (props.mime === 'application/pdf'){
-  fileIcon = 'akar-icons:file'
-}
-
-if (props.mime === 'folder'){
-  fileIcon = 'akar-icons:folder'
-}
-
 
 </script>
 
 <template>
   <div class="flex flex-row items-center">
-    <Icon :icon="fileIcon" class="icons mr-3"></Icon>
+    <Icon :icon="icon" class="icons mr-3"></Icon>
     {{name}}
     <TooltipProvider>
       <Tooltip>

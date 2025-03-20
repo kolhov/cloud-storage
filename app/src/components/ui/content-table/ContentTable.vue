@@ -18,6 +18,7 @@ const props = defineProps<{
   folders: Folders | null
 }>();
 
+//TODO сортировать
 const formattedFiles = computed(() => {
   if (!props.files) return;
   return props.files.map(file => {
@@ -44,26 +45,26 @@ const formattedFiles = computed(() => {
     <TableBody v-if="files && folders">
       <!-- folders first -->
       <!-- draggable mb? -->
-      <TableRow v-for="folder in folders" :key="folder.id" >
+      <TableRow v-for="item in folders" :key="item.id" >
         <TableCell class="font-medium p-0">
-          <RouterLink class="hover:bg-muted h-full block p-4" :to="`/folder/${folder.id}`">
-            <TableFileName :name="folder.name" mime="folder" :is-public="folder.public" />
+          <RouterLink class="hover:bg-muted h-full block p-4" :to="`/folder/${item.id}`">
+            <TableFileName :name="item.name" :icon="item.icon" :is-public="item.public" />
           </RouterLink>
         </TableCell>
         <TableCell></TableCell>
         <TableCell class="text-right">
-          <ItemMenu :item="folder"/>
+          <ItemMenu :item="item"/>
         </TableCell>
       </TableRow>
 
       <!-- files   -->
-      <TableRow v-for="file in formattedFiles" :key="file.id">
+      <TableRow v-for="item in formattedFiles" :key="item.id">
         <TableCell class="font-medium">
-          <TableFileName :name="file.name" :mime="file.mime" :is-public="file.public" />
+          <TableFileName :name="item.name" :icon="item.icon" :is-public="item.public" />
         </TableCell>
-        <TableCell>{{ file.formattedSize }}</TableCell>
+        <TableCell>{{ item.formattedSize }}</TableCell>
         <TableCell class="text-right">
-          <ItemMenu :item="file"/>
+          <ItemMenu :item="item"/>
         </TableCell>
       </TableRow>
     </TableBody>
