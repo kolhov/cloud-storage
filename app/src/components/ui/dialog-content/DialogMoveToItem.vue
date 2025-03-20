@@ -30,7 +30,7 @@ const props = defineProps<{
       </Button>
     </DialogClose>
     <DialogClose as-child>
-      <Button type="button" variant="destructive" @click="deleteItem">
+      <Button type="button" variant="destructive" @click="">
         Delete
       </Button>
     </DialogClose>

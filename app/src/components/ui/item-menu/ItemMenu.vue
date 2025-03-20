@@ -21,7 +21,9 @@ import {
 import DialogDeleteItem from '@/components/ui/dialog-content/DialogDeleteItem.vue'
 import DialogMoveToItem from '@/components/ui/dialog-content/DialogMoveToItem.vue'
 import DialogRenameItem from '@/components/ui/dialog-content/DialogRenameItem.vue'
+import { useToast } from '@/components/ui/toast'
 
+const { toast } = useToast();
 const prop = defineProps<{
   item: Files[0] | Folder,
 }>();
@@ -53,6 +55,9 @@ function copyLink() {
     link += `/shared/folder/${prop.item.id}`;
   }
   navigator.clipboard.writeText(link);
+  toast({
+    description: 'The file link has been copied to the clipboard.'
+  });
 }
 
 function makeItemPublic(){
@@ -80,7 +85,8 @@ const isFile = computed(() => {
   <Dialog>
     <DropdownMenu :modal="false">
       <DropdownMenuTrigger asChild>
-        <Icon icon="akar-icons:more-vertical" />
+        <Icon icon="akar-icons:more-vertical"
+              class="hover:cursor-pointer hover:bg-muted rounded-full p-2 box-content" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem>Download</DropdownMenuItem>

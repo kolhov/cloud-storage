@@ -36,7 +36,7 @@ const formattedFiles = computed(() => {
       <TableRow>
         <TableHead class="w-auto">Name</TableHead>
         <TableHead class="w-[150px]">Size</TableHead>
-        <TableHead class="w-[50px]">
+        <TableHead class="w-[50px] p-2">
           <Icon icon="akar-icons:more-vertical" />
         </TableHead>
       </TableRow>
@@ -52,7 +52,7 @@ const formattedFiles = computed(() => {
           </RouterLink>
         </TableCell>
         <TableCell></TableCell>
-        <TableCell class="text-right">
+        <TableCell class="text-right p-0">
           <ItemMenu :item="item"/>
         </TableCell>
       </TableRow>
@@ -63,8 +63,8 @@ const formattedFiles = computed(() => {
           <TableFileName :name="item.name" :icon="item.icon" :is-public="item.public" />
         </TableCell>
         <TableCell>{{ item.formattedSize }}</TableCell>
-        <TableCell class="text-right">
-          <ItemMenu :item="item"/>
+        <TableCell class="text-right p-0">
+          <ItemMenu :item="item" />
         </TableCell>
       </TableRow>
     </TableBody>
