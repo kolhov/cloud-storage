@@ -8,7 +8,7 @@ export const insertFileQuery = (file: Express.Multer.File, req: Request, isPubli
     icon: req.body.icon,
     id: req.body.fileUuid,
     mime: req.body.mime,
-    name: file.originalname,
+    name: decodeURIComponent(file.originalname),
     owner: req.body.userUuid,
     public: isPublic,
     size: file.size

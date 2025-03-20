@@ -21,12 +21,11 @@ export const useFileUploader = defineStore('file-uploader', () => {
     if (!fileMime) fileMime = '';
 
     let formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', file, encodeURIComponent(file.name));
     formData.append('folderId', folderId ?? 'null');
     formData.append('icon', mimeToIcon(fileMime));
     formData.append('mime', fileMime);
 
-    //console.log(fileMime);
     return await axios.post(url + '/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
