@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Home } from 'lucide-vue-next'
 import {
   Sidebar,
   SidebarContent,
@@ -11,15 +10,18 @@ import {
   SidebarMenuItem, type SidebarProps
 } from '@/components/ui/sidebar'
 import SideBarAddHead from '@/components/layout/sidebar/SideBarAddHead.vue'
-import SidebarFolderTree from '@/components/layout/sidebar/SidebarFolderTree.vue'
+import SidebarCurrentFolder from '@/components/layout/sidebar/SidebarCurrentFolder.vue'
 import { Icon } from '@iconify/vue'
+import { storeToRefs } from 'pinia'
+import { useStorageStore } from '@/stores/storageStore.ts'
+import SidebarFolderTree from '@/components/layout/sidebar/SidebarFolderTree.vue'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: 'icon'
 })
 
+const { folders, sidebarFoldersTree } = storeToRefs(useStorageStore());
 const data = {
-  addHeader: [],
   content: [
     {
       title: 'Home',
@@ -33,7 +35,7 @@ const data = {
 <template>
   <Sidebar v-bind="props">
     <SidebarHeader>
-      <SideBarAddHead :teams="data.addHeader" />
+      <SideBarAddHead />
     </SidebarHeader>
     <SidebarContent>
       <SidebarGroup>
@@ -53,7 +55,15 @@ const data = {
       </SidebarGroup>
       <SidebarGroup>
         <SidebarGroupLabel>My folders</SidebarGroupLabel>
-        <SidebarFolderTree />
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarFolderTree v-for="(item, index) in sidebarFoldersTree" :key="index" :item="item" />
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+      <SidebarGroup>
+        <SidebarGroupLabel>Current folder</SidebarGroupLabel>
+        <SidebarCurrentFolder :folders="folders" v-if="folders" />
       </SidebarGroup>
     </SidebarContent>
   </Sidebar>

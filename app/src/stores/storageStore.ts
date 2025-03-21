@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia'
 import { ref } from 'vue'
-import { filesQuery, foldersQuery } from '@/lib/supabase/supabaseQueries.ts'
+import { filesQuery, foldersQuery, getAllFoldersQuery } from '@/lib/supabase/supabaseQueries.ts'
 import { useErrorStore } from '@/stores/errorStore.ts'
 import { useAuthStore } from '@/stores/authStore.ts'
 import type { Files, Folders } from '@/lib/supabase/supabaseQueryTypes.ts'
@@ -38,7 +38,25 @@ export const useStorageStore = defineStore('storage', () => {
   ])
   const currentFolderId = ref<string | null>(null)
 
-  const sidebarFoldersTree = ref(null)
+  const sidebarFoldersTree = ref([
+    [
+      'app',
+      [
+        'api',
+        ['hello', ['route.ts']],
+        'page.tsx',
+        'layout.tsx',
+        ['blog', ['page.tsx']],
+      ],
+    ],
+    [
+      'components',
+      ['ui', 'button.tsx', 'card.tsx'],
+      'header.tsx',
+      'footer.tsx',
+    ],
+    ['lib', ['util.ts']],
+  ])
 
   async function setCurrentFolderId(id: string | null) {
     currentFolderId.value = id
@@ -63,6 +81,16 @@ export const useStorageStore = defineStore('storage', () => {
     folders.value = data
   }
 
+  async function refreshFoldersTree() {
+    const { user } = useAuthStore()
+    if (!user) return
+    const { data, error, status } = await getAllFoldersQuery(user.id)
+
+    if (error) useErrorStore().setError({ error, customCode: status })
+
+
+  }
+
   function refreshStorage() {
     refreshFiles()
     refreshFolders()
@@ -76,7 +104,8 @@ export const useStorageStore = defineStore('storage', () => {
     refreshStorage,
     setCurrentFolderId,
     refreshFolders,
-    refreshFiles
+    refreshFiles,
+    refreshFoldersTree
   }
 });
 
