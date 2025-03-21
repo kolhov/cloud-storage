@@ -32,7 +32,9 @@ function dropFileHandler(ev: Event) {
        @dragenter.prevent="showBlock"
        @dragover.prevent="showBlock"
        @dragleave.prevent="hideBlock"
-       :class="{dragActive: isShow}">
+       :class="{dragActive: isShow}"
+       class="min-h-96"
+  >
     <div v-if="isShow" class="p-4 flex justify-center items-center text-gray-500 text-xl">
       Drop files to upload
     </div>
