@@ -44,24 +44,23 @@ const dialogComponents = {
 
 function setDialog(selectDialog: dialog) {
   currentDialog.value = selectDialog;
-
 }
 
 function copyLink() {
   let link = window.location.origin;
-  if (isFile) {
+  if (isFile.value) {
     link += `/shared/${prop.item.id}`;
   } else {
     link += `/shared/folder/${prop.item.id}`;
   }
   navigator.clipboard.writeText(link);
   toast({
-    description: 'The file link has been copied to the clipboard.'
+    description: 'The link has been copied to the clipboard.'
   });
 }
 
 function makeItemPublic(){
-  if (isFile) {
+  if (isFile.value) {
     updateFilePublic(prop.item.id, true);
   } else {
     updateFolderPublic(prop.item.id, true);
@@ -69,7 +68,7 @@ function makeItemPublic(){
 }
 
 function makeItemPrivate(){
-  if (isFile) {
+  if (isFile.value) {
     updateFilePublic(prop.item.id, false);
   } else {
     updateFolderPublic(prop.item.id, false);
@@ -77,7 +76,7 @@ function makeItemPrivate(){
 }
 
 const isFile = computed(() => {
-  return 'size' in prop.item;
+  return 'mime' in prop.item
 })
 </script>
 
