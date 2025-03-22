@@ -18,30 +18,33 @@ export function folderTreeConstructor(folders: Folders): FolderTreeNode[] {
     }
   }
 
-  for (let i = 0; i < folders.length; i++) {
-    const folder = folders[i]
-    if (folder.folder === null) break
+  let i = 0;
+  while (folders.length > 0) {
+    const folder = folders[i];
+
+    if (folder.folder === null) break;
     if (folder.folder in memo) {
       const indexes = memo[folder.folder];
       if (indexes.length === 1) {
         const length = tree[indexes[0]].folders.push({
           ...folders.splice(i, 1)[0],
           folders: []
-        } as FolderTreeNode)
-        memo[folder.id] = [...memo[folder.folder], length - 1]
-        i--;
+        } as FolderTreeNode);
+        memo[folder.id] = [...memo[folder.folder], length - 1];
         continue;
       }
 
-      let treePointer = tree
+      let treePointer = tree;
       for (let x = 0; x < indexes.length; x++) {
-        treePointer = treePointer[indexes[x]].folders
+        treePointer = treePointer[indexes[x]].folders;
       }
-      const length = treePointer.push({ ...folders.splice(i, 1)[0], folders: [] } as FolderTreeNode)
-      memo[folder.id] = [[...memo[folder.folder]].push(length - 1)]
-      i--;
+      const length = treePointer.push({ ...folders.splice(i, 1)[0], folders: [] } as FolderTreeNode);
+      memo[folder.id] = [[...memo[folder.folder]].push(length - 1)];
     }
+
+    i++;
+    if (i === folders.length) i = 0;
   }
-  console.log(tree)
+
   return tree
 }

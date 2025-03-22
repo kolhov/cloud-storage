@@ -47,7 +47,6 @@ export const useStorageStore = defineStore('storage', () => {
     if (error) useErrorStore().setError({ error, customCode: status })
 
     if (data) foldersTree.value = folderTreeConstructor(data);
-    console.log(foldersTree.value)
   }
 
   function refreshStorage() {
