@@ -26,6 +26,5 @@ declare module 'vue-router/auto-routes' {
     '/register': RouteRecordInfo<'/register', '/register', Record<never, never>, Record<never, never>>,
     '/shared/[uuid]': RouteRecordInfo<'/shared/[uuid]', '/shared/:uuid', { uuid: ParamValue<true> }, { uuid: ParamValue<false> }>,
     '/shared/folder/[uuid]': RouteRecordInfo<'/shared/folder/[uuid]', '/shared/folder/:uuid', { uuid: ParamValue<true> }, { uuid: ParamValue<false> }>,
-    '/tasks/[id]': RouteRecordInfo<'/tasks/[id]', '/tasks/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
   }
 }

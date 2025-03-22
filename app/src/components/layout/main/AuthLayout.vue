@@ -16,7 +16,7 @@ const {pageData} = storeToRefs(usePageStore());
           <SidebarTrigger />
         </TopNavBar>
         <div class="items-center p-4">
-          <h1 class="text-lg font-semibold md:text-2xl">{{ pageData.title }}</h1>
+          <h1 class="text-lg font-semibold md:text-2xl m-2">{{ pageData.title }}</h1>
           <slot />
         </div>
       </main>

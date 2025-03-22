@@ -15,12 +15,13 @@ import { Icon } from '@iconify/vue'
 import { storeToRefs } from 'pinia'
 import { useStorageStore } from '@/stores/storageStore.ts'
 import SidebarFolderTree from '@/components/layout/sidebar/SidebarFolderTree.vue'
+import SidebarFolderTreeWrap from '@/components/layout/sidebar/SidebarFolderTreeWrap.vue'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: 'icon'
 })
 
-const { folders, sidebarFoldersTree } = storeToRefs(useStorageStore());
+const { folders, foldersTree } = storeToRefs(useStorageStore());
 const data = {
   content: [
     {
@@ -57,7 +58,9 @@ const data = {
         <SidebarGroupLabel>My folders</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
-            <SidebarFolderTree v-for="(item, index) in sidebarFoldersTree" :key="index" :item="item" />
+            <Suspense>
+              <SidebarFolderTreeWrap :items="foldersTree"/>
+            </Suspense>
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>

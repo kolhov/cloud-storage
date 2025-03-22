@@ -4,59 +4,15 @@ import { filesQuery, foldersQuery, getAllFoldersQuery } from '@/lib/supabase/sup
 import { useErrorStore } from '@/stores/errorStore.ts'
 import { useAuthStore } from '@/stores/authStore.ts'
 import type { Files, Folders } from '@/lib/supabase/supabaseQueryTypes.ts'
+import type { FolderTreeNode } from '@/types/folder.tree.type.ts'
+import { folderTreeConstructor } from '@/lib/folderTreeConstructor.ts'
 
 export const useStorageStore = defineStore('storage', () => {
-  const files = ref<Files | null>(null)
-  const folders = ref<Folders | null>([
-    {
-      'id': 'fb9ad475-5622-43b5-9d92-c66e64d41dc3',
-      'created_at': '2025-03-07T20:15:52.222+00:00',
-      'name': 'folder1',
-      'public': false,
-      'folder': null,
-      'owner': 'f5af5021-1e9e-4bd0-9e1c-6b3e16308042',
-      'icon': 'Folder'
-    },
-    {
-      'id': '8950ba55-a56e-4df1-8248-15a16b88d918',
-      'created_at': '2025-03-07T20:15:52.222+00:00',
-      'name': 'folder2',
-      'public': true,
-      'folder': null,
-      'owner': 'f5af5021-1e9e-4bd0-9e1c-6b3e16308042',
-      'icon': 'Folder'
-    },
-    {
-      'id': '6c17e000-e006-4eb4-9de4-95f8c307b8be',
-      'created_at': '2025-03-07T20:15:52.299433+00:00',
-      'name': 'folder-inside-folder1',
-      'public': false,
-      'folder': 'fb9ad475-5622-43b5-9d92-c66e64d41dc3',
-      'owner': 'f5af5021-1e9e-4bd0-9e1c-6b3e16308042',
-      'icon': 'Folder'
-    }
-  ])
-  const currentFolderId = ref<string | null>(null)
-
-  const sidebarFoldersTree = ref([
-    [
-      'app',
-      [
-        'api',
-        ['hello', ['route.ts']],
-        'page.tsx',
-        'layout.tsx',
-        ['blog', ['page.tsx']],
-      ],
-    ],
-    [
-      'components',
-      ['ui', 'button.tsx', 'card.tsx'],
-      'header.tsx',
-      'footer.tsx',
-    ],
-    ['lib', ['util.ts']],
-  ])
+  const { user } = storeToRefs(useAuthStore());
+  const files = ref<Files | null>(null);
+  const folders = ref<Folders | null>(null);
+  const currentFolderId = ref<string | null>(null);
+  const foldersTree = ref<FolderTreeNode[] | null>(null);
 
   async function setCurrentFolderId(id: string | null) {
     currentFolderId.value = id
@@ -64,42 +20,45 @@ export const useStorageStore = defineStore('storage', () => {
   }
 
   async function refreshFiles() {
-    const { user } = useAuthStore()
-    if (!user) return
-    const { data, error, status } = await filesQuery(user.id, currentFolderId.value)
+    if (!user.value) return
+    const { data, error, status } = await filesQuery(user.value.id, currentFolderId.value)
 
     if (error) useErrorStore().setError({ error, customCode: status })
     files.value = data
   }
 
-  async function refreshFolders() {
-    const { user } = useAuthStore()
-    if (!user) return
-    const { data, error, status } = await foldersQuery(user.id, currentFolderId.value)
+  async function fetchFolders() {
+    if (!user.value) return
+    const { data, error, status } = await foldersQuery(user.value.id, currentFolderId.value)
 
     if (error) useErrorStore().setError({ error, customCode: status })
     folders.value = data
   }
 
+  async function refreshFolders() {
+    fetchFolders();
+    refreshFoldersTree();
+  }
+
   async function refreshFoldersTree() {
-    const { user } = useAuthStore()
-    if (!user) return
-    const { data, error, status } = await getAllFoldersQuery(user.id)
+    if (!user.value) return console.log('no')
+    const { data, error, status } = await getAllFoldersQuery(user.value.id)
 
     if (error) useErrorStore().setError({ error, customCode: status })
 
-
+    if (data) foldersTree.value = folderTreeConstructor(data);
+    console.log(foldersTree.value)
   }
 
   function refreshStorage() {
     refreshFiles()
-    refreshFolders()
+    fetchFolders()
   }
 
   return {
     files,
     folders,
-    sidebarFoldersTree,
+    foldersTree,
     currentFolderId,
     refreshStorage,
     setCurrentFolderId,

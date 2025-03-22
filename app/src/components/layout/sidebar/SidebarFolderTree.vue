@@ -6,18 +6,18 @@ import {
 } from '@/components/ui/sidebar'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { Icon } from '@iconify/vue'
+import type { FolderTreeNode } from '@/types/folder.tree.type.ts'
 
-const props = defineProps<{
-  item: string | any[]
+defineProps<{
+  item: FolderTreeNode
 }>()
-const [name, ...items] = Array.isArray(props.item) ? props.item : [props.item]
-
 </script>
 
 <template>
   <SidebarMenuButton
     class="mr-0 pr-0"
-    v-if="!items.length"
+    v-if="item.folders.length == 0"
+    asChild
   >
     <RouterLink :to="`/folder/${item.id}`">
       <Icon icon="akar-icons:folder" />
@@ -28,16 +28,20 @@ const [name, ...items] = Array.isArray(props.item) ? props.item : [props.item]
     <Collapsible
       class="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
     >
-      <CollapsibleTrigger as-child class="mr-0 pr-0">
+      <CollapsibleTrigger asChild class="mr-0 pr-0">
         <SidebarMenuButton>
           <Icon icon="akar-icons:chevron-right-small" class="transition-transform" />
-          <Icon icon="akar-icons:folder"/>
-          {{ name }}
+          <RouterLink :to="`/folder/${item.id}`"
+                      class="peer/menu-button flex text-sm gap-2 justify-items-start items-center"
+          >
+            <Icon icon="akar-icons:folder" class="text-base" />
+            <span>{{ item.name }}</span>
+          </RouterLink>
         </SidebarMenuButton>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <SidebarMenuSub class="mr-0 pr-0">
-          <SidebarFolderTree v-for="(subItem, index) in items" :key="index" :item="subItem" />
+          <SidebarFolderTree v-for="(subItem, index) in item.folders" :key="index" :item="subItem" />
         </SidebarMenuSub>
       </CollapsibleContent>
     </Collapsible>

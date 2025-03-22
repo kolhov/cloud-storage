@@ -11,7 +11,7 @@ import { Icon } from '@iconify/vue'
 const { isMobile } = useSidebar()
 
 function addFolder(){
-  console.log('add folder')
+
 }
 function uploadFiles(){
 
@@ -25,7 +25,7 @@ function uploadFiles(){
         <DropdownMenuTrigger as-child>
           <SidebarMenuButton
             size="lg"
-            class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            class="data-[state=open]:bg-sidebar-accent bg-slate-800"
           >
             <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
               <Icon icon="akar-icons:plus" class="size-4" />
