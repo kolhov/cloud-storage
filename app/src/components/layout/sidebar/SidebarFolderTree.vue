@@ -7,10 +7,12 @@ import {
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { Icon } from '@iconify/vue'
 import type { FolderTreeNode } from '@/types/folder.tree.type.ts'
+import { ref } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   item: FolderTreeNode
 }>()
+const isOpen = ref(false);
 </script>
 
 <template>
@@ -27,15 +29,17 @@ defineProps<{
   <SidebarMenuItem v-else>
     <Collapsible
       class="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
+      v-model:open="isOpen"
     >
       <CollapsibleTrigger asChild class="mr-0 pr-0">
         <SidebarMenuButton>
           <Icon icon="akar-icons:chevron-right-small" class="transition-transform" />
           <RouterLink :to="`/folder/${item.id}`"
                       class="peer/menu-button flex text-sm gap-2 justify-items-start items-center"
+                      @click.stop
           >
-            <Icon icon="akar-icons:folder" class="text-base" />
-            <span>{{ item.name }}</span>
+            <Icon icon="akar-icons:folder" class="text-base w-4" />
+            <span class="min-w-24" >{{ item.name }}</span>
           </RouterLink>
         </SidebarMenuButton>
       </CollapsibleTrigger>
