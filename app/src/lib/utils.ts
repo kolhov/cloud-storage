@@ -29,3 +29,13 @@ export function convertDateFromIso(isoDate: string){
 export function bytesToString(byte: number){
   return bytes(byte, {unitSeparator: ' '});
 }
+
+export function downloadFileWithIframe(downloadUrl: string) {
+  const iframe = document.createElement('iframe')
+  iframe.style.display = 'none'
+  iframe.src = downloadUrl
+  document.body.appendChild(iframe)
+  setTimeout(() => {
+    document.body.removeChild(iframe)
+  }, 1000)
+}

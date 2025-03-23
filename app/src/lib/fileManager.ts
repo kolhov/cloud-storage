@@ -10,6 +10,7 @@ import {
 } from '@/lib/supabase/supabaseQueries.ts'
 import { useStorageStore } from '@/stores/storageStore.ts'
 import type { PostgrestError } from '@supabase/supabase-js'
+import { downloadFileWithIframe } from '@/lib/utils.ts'
 
 function logError(error: PostgrestError) {
   //TODO send something to user
@@ -95,7 +96,8 @@ export async function updateFolderFolder(id: string, newFolderId: string){
 export async function downloadSharedFile(id: string){
   const serverUrl = import.meta.env.VITE_STORAGE_ENDPOINT as string;
   const downloadUrl = serverUrl + `/download-shared/${id}`;
-  window.open(downloadUrl, '_blank');
+
+  downloadFileWithIframe(downloadUrl);
 }
 
 export async function downloadFile(id: string){
