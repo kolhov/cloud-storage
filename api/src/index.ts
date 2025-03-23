@@ -2,7 +2,13 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { multerUpload } from '@/lib/multerSettings';
-import { deleteFileQuery, deleteFolderQuery, filesQuery, insertFileQuery } from '@/lib/supabase/supabaseQueries'
+import {
+  deleteFileQuery,
+  deleteFolderQuery,
+  filesQuery,
+  insertFileQuery,
+  publicFileQuery
+} from '@/lib/supabase/supabaseQueries'
 import { headerToUser } from '@/lib/utils'
 import * as fs from 'node:fs'
 import path from 'node:path'
@@ -36,8 +42,23 @@ app.post('/upload', multerUpload.single('file'), async (req, res) => {
   res.sendStatus(200);
 });
 
-app.get('/download', (req, res) => {
+app.get('/download-shared/:id', async (req, res) => {
+  const {data, error} = await publicFileQuery(req.params.id);
+  if (error) {
+    res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
+  }
+  if (data === null){
+    res.sendStatus(403);
+    return;
+  }
 
+  const filePath = path.join(process.cwd(), 'storage', data.owner, data.id)
+  res.download(filePath, data.name, (err) => {
+    if (err){
+      console.error('Download error: ', err);
+      if (!res.headersSent) res.sendStatus(500);
+    }
+  })
 })
 
 app.delete('/file', async (req, res ) => {

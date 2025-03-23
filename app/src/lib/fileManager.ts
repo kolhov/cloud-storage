@@ -91,3 +91,15 @@ export async function updateFolderFolder(id: string, newFolderId: string){
   }
   await useStorageStore().refreshFolders();
 }
+
+export async function downloadSharedFile(id: string){
+  const serverUrl = import.meta.env.VITE_STORAGE_ENDPOINT as string;
+  const downloadUrl = serverUrl + `/download-shared/${id}`;
+  window.open(downloadUrl, '_blank');
+}
+
+export async function downloadFile(id: string){
+  const serverUrl = import.meta.env.VITE_STORAGE_ENDPOINT as string;
+  //TODO token manager
+  //window.open(downloadUrl, '_blank');
+}

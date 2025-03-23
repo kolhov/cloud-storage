@@ -32,6 +32,7 @@ export const deleteFileQuery = (id: string | string[], userId: string) => {
     return query.eq('id', id);
   }
 }
+
 export const deleteFolderQuery = (id: string, userId: string) =>
   supabase
     .from('folders')
@@ -46,3 +47,10 @@ export const filesQuery = (userid: string, folder: string) =>
     .eq('owner', userid)
     .eq('folder', folder);
 
+export const publicFileQuery = (id: string) =>
+  supabase
+    .from('files')
+    .select()
+    .eq('id', id)
+    .eq('public', true)
+    .single();

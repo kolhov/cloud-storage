@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn, bytesToString, convertDateFromIso } from '@/lib/utils.ts'
 import { Icon } from '@iconify/vue'
+import { downloadSharedFile } from '@/lib/fileManager.ts'
 
 const route = useRoute('/shared/[uuid]');
 const file = ref<SharedFile | null>(null);
@@ -36,6 +37,11 @@ const userFriendlySize = computed(() => {
   if (!file.value) return
   return bytesToString(file.value.size ?? 10)
 })
+
+function download() {
+  if (!file.value) return;
+  downloadSharedFile(file.value.id);
+}
 </script>
 
 <template>
@@ -93,7 +99,7 @@ const userFriendlySize = computed(() => {
         </div>
       </CardContent>
       <CardFooter>
-        <Button class="w-full">
+        <Button class="w-full" @click="download">
           <Icon icon="akar-icons:cloud-download" />
           Download
         </Button>

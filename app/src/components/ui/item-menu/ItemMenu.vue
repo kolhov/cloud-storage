@@ -15,6 +15,8 @@ import {
 import { computed, ref } from 'vue'
 import type { Files, Folder } from '@/lib/supabase/supabaseQueryTypes.ts'
 import {
+  downloadFile,
+  downloadSharedFile,
   updateFilePublic,
   updateFolderPublic
 } from '@/lib/fileManager.ts'
@@ -78,6 +80,22 @@ function makeItemPrivate(){
 const isFile = computed(() => {
   return 'mime' in prop.item
 })
+
+function download(){
+  if (prop.item.public) {
+    if (isFile.value) {
+      downloadSharedFile(prop.item.id);
+    } else {
+
+    }
+    return;
+  }
+  if (isFile.value) {
+    downloadFile(prop.item.id);
+  } else {
+
+  }
+}
 </script>
 
 <template>
@@ -88,7 +106,7 @@ const isFile = computed(() => {
               class="hover:cursor-pointer hover:bg-muted rounded-full p-2 box-content" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>Download</DropdownMenuItem>
+        <DropdownMenuItem @click="download">Download</DropdownMenuItem>
 
         <DialogTrigger asChild @click="setDialog(dialog.moveTo)">
           <DropdownMenuItem>
