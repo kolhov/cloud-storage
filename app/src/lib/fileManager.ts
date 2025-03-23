@@ -77,7 +77,7 @@ export async function updateFolderName(id: string, newName: string){
   await useStorageStore().refreshFolders();
 }
 
-export async function updateFIleFolder(id: string, newFolderId: string){
+export async function updateFIleFolder(id: string, newFolderId: string | null){
   const {data, error} = await updateFileFolderQuery(id, newFolderId);
   if (error) {
     logError(error);
@@ -85,7 +85,7 @@ export async function updateFIleFolder(id: string, newFolderId: string){
   await useStorageStore().refreshFiles();
 }
 
-export async function updateFolderFolder(id: string, newFolderId: string){
+export async function updateFolderFolder(id: string, newFolderId: string | null){
   const {data, error} = await updateFolderFolderQuery(id, newFolderId);
   if (error) {
     logError(error);

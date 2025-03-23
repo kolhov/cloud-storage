@@ -23,7 +23,7 @@ const isOpen = ref(false);
   >
     <RouterLink :to="`/folder/${item.id}`">
       <Icon icon="akar-icons:folder" />
-      <span>{{ item.name }}</span>
+      <span class="min-w-24">{{ item.name }}</span>
     </RouterLink>
   </SidebarMenuButton>
   <SidebarMenuItem v-else>

@@ -116,13 +116,13 @@ export const updateFolderNameQuery = (id: string, name: string) =>
     .update({ 'name': name })
     .eq('id', id);
 
-export const updateFileFolderQuery = (id: string, folderId: string) =>
+export const updateFileFolderQuery = (id: string, folderId: string | null) =>
   supabase
     .from('files')
     .update({ 'folder': folderId })
     .eq('id', id);
 
-export const updateFolderFolderQuery = (id: string, folderId: string) =>
+export const updateFolderFolderQuery = (id: string, folderId: string | null) =>
   supabase
     .from('folders')
     .update({ 'folder': folderId })

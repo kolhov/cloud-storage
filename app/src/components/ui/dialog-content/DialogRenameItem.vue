@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { updateFileName, updateFolderName } from '@/lib/fileManager.ts'
 import { ref } from 'vue'
 
+
 const props = defineProps<{
   isFile: boolean,
   item: Files[0] | Folder

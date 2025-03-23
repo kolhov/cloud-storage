@@ -52,14 +52,14 @@ app.get('/download-shared/:id', async (req, res) => {
     return;
   }
 
-  const filePath = path.join(process.cwd(), 'storage', data.owner, data.id)
+  const filePath = path.join(process.cwd(), 'storage', data.owner, data.id);
   res.download(filePath, data.name, (err) => {
     if (err){
       console.error('Download error: ', err);
       if (!res.headersSent) res.sendStatus(500);
     }
-  })
-})
+  });
+});
 
 app.delete('/file', async (req, res ) => {
   const userId = await headerToUser(req);
