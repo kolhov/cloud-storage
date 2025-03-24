@@ -10,7 +10,8 @@ import {
 } from '@/lib/supabase/supabaseQueries.ts'
 import { useStorageStore } from '@/stores/storageStore.ts'
 import { downloadFileWithIframe } from '@/lib/utils.ts'
-import { useToast } from '@/components/ui/toast'
+import { useToast, ToastAction } from '@/components/ui/toast'
+import { h } from 'vue'
 
 function logError(error: any) {
   //TODO send to db logs
@@ -56,6 +57,17 @@ export async function updateFilePublic(id: string, isPublic: boolean){
     logError(error);
   }
   await useStorageStore().refreshFiles();
+
+  useToast().toast({
+    description: isPublic ? 'Anyone with the link can view this file'
+      : 'The file now is available only to you',
+    action: h(ToastAction, {
+      altText: 'Revert',
+      onClick: () => updateFilePublic(id, !isPublic)
+    }, {
+      default: () => 'Revert',
+    }),
+  });
 }
 
 export async function updateFolderPublic(id: string, isPublic: boolean){
@@ -64,6 +76,17 @@ export async function updateFolderPublic(id: string, isPublic: boolean){
     logError(error);
   }
   await useStorageStore().refreshFolders();
+
+  useToast().toast({
+    description: isPublic ? 'Anyone with the link can view this folder'
+      : 'The folder now is available only to you',
+    action: h(ToastAction, {
+      altText: 'Revert',
+      onClick: () => updateFilePublic(id, !isPublic)
+    }, {
+      default: () => 'Revert',
+    }),
+  });
 }
 
 export async function updateFileName(id: string, newName: string){
@@ -72,6 +95,10 @@ export async function updateFileName(id: string, newName: string){
     logError(error);
   }
   await useStorageStore().refreshFiles();
+
+  useToast().toast({
+    description: `File renamed to: ${data?.name ?? 'Home'}`,
+  });
 }
 
 export async function updateFolderName(id: string, newName: string){
@@ -80,6 +107,10 @@ export async function updateFolderName(id: string, newName: string){
     logError(error);
   }
   await useStorageStore().refreshFolders();
+
+  useToast().toast({
+    description: `Folder renamed to: ${data?.name ?? 'Home'}`,
+  });
 }
 
 export async function updateFIleFolder(id: string, newFolderId: string | null){
@@ -88,19 +119,31 @@ export async function updateFIleFolder(id: string, newFolderId: string | null){
     logError(error);
   }
   await useStorageStore().refreshFiles();
+
+  useToast().toast({
+    description: `File moved to: ${data?.folder?.name ?? 'Home'}`,
+  });
 }
 
 export async function updateFolderFolder(id: string, newFolderId: string | null){
   const {data, error} = await updateFolderFolderQuery(id, newFolderId);
   if (error) {
     logError(error);
+    return;
   }
   await useStorageStore().refreshFolders();
+
+  useToast().toast({
+    description: `Folder moved to: ${data.folder?.name ?? 'Home'}`,
+  });
 }
 
 export async function downloadSharedFile(id: string){
   const serverUrl = import.meta.env.VITE_STORAGE_ENDPOINT as string;
   const downloadUrl = serverUrl + `/download-shared/${id}`;
+  useToast().toast({
+    description: 'Preparing the file.',
+  });
 
   downloadFileWithIframe(downloadUrl);
 }
@@ -108,6 +151,9 @@ export async function downloadSharedFile(id: string){
 export async function downloadFile(id: string){
   const serverUrl = import.meta.env.VITE_STORAGE_ENDPOINT as string;
   const { accessToken, user } = useAuthStore();
+  useToast().toast({
+    description: 'Preparing the file.',
+  });
 
   const response = await axios.get(serverUrl + `/download-token/file/${id}`, {
     headers: {

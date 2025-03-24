@@ -108,25 +108,39 @@ export const updateFileNameQuery = (id: string, name: string) =>
   supabase
     .from('files')
     .update({ 'name': name })
-    .eq('id', id);
+    .eq('id', id)
+    .select(`name`)
+    .single();
 
 export const updateFolderNameQuery = (id: string, name: string) =>
   supabase
     .from('folders')
     .update({ 'name': name })
-    .eq('id', id);
+    .eq('id', id)
+    .select(`name`)
+    .single();
 
 export const updateFileFolderQuery = (id: string, folderId: string | null) =>
   supabase
     .from('files')
     .update({ 'folder': folderId })
-    .eq('id', id);
+    .eq('id', id)
+    .select(`
+    folder(
+      name
+    )`)
+    .single();
 
 export const updateFolderFolderQuery = (id: string, folderId: string | null) =>
   supabase
     .from('folders')
     .update({ 'folder': folderId })
-    .eq('id', id);
+    .eq('id', id)
+    .select(`
+    folder(
+      name
+    )`)
+    .single();
 
 
 

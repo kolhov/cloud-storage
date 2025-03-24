@@ -2,6 +2,7 @@ import { Request } from 'express'
 import { supabase } from '@/lib/supabase/supabaseClient'
 import { deleteTokenQuery } from '@/lib/supabase/supabaseQueries'
 
+//TODO refactor to middleware
 export function getHeaderToken(req: Request){
   const authHeader = req.headers.authorization;
   if (!authHeader) {

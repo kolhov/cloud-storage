@@ -106,7 +106,7 @@ function download(){
               class="hover:cursor-pointer hover:bg-muted rounded-full p-2 box-content" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem @click="download">Download</DropdownMenuItem>
+        <DropdownMenuItem v-if="isFile" @click="download">Download</DropdownMenuItem>
 
         <DialogTrigger asChild @click="setDialog(dialog.moveTo)">
           <DropdownMenuItem>

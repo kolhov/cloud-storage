@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import {
-  DialogClose,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import type { Files, Folder } from '@/lib/supabase/supabaseQueryTypes.ts'
 import { updateFIleFolder, updateFolderFolder } from '@/lib/fileManager.ts'
 import { onMounted, ref } from 'vue'
@@ -29,6 +26,7 @@ function moveItem(id: string | null){
   } else {
     updateFolderFolder(props.item.id, id);
   }
+
 }
 
 onMounted(async () => {

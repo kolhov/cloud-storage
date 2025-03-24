@@ -42,7 +42,6 @@ export const useFileUploader = defineStore('file-uploader', () => {
 
     response = await simpleUpload(file, accessToken.value, folderId);
 
-    console.log(response);
     return response;
   }
 
