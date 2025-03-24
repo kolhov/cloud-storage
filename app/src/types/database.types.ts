@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      download_tokens: {
+        Row: {
+          created_at: string
+          expiration_time: string
+          file_id: string | null
+          folder_id: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          expiration_time?: string
+          file_id?: string | null
+          folder_id?: string | null
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          expiration_time?: string
+          file_id?: string | null
+          folder_id?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "download_tokens_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "download_tokens_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       files: {
         Row: {
           created_at: string

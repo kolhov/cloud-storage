@@ -17,7 +17,7 @@ const isOpen = ref(false);
 
 <template>
   <SidebarMenuButton
-    class="mr-0 pr-0"
+    class="mr-0 pr-0 pl-[2.1rem]"
     v-if="item.folders.length == 0"
     asChild
   >
@@ -35,7 +35,7 @@ const isOpen = ref(false);
         <SidebarMenuButton>
           <Icon icon="akar-icons:chevron-right-small" class="transition-transform" />
           <RouterLink :to="`/folder/${item.id}`"
-                      class="peer/menu-button flex text-sm gap-2 justify-items-start items-center"
+                      class="peer/menu-button pl-[0.1rem] flex text-sm gap-2 justify-items-start items-center"
                       @click.stop
           >
             <Icon icon="akar-icons:folder" class="text-base w-4" />

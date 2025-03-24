@@ -9,12 +9,17 @@ import {
   updateFolderFolderQuery
 } from '@/lib/supabase/supabaseQueries.ts'
 import { useStorageStore } from '@/stores/storageStore.ts'
-import type { PostgrestError } from '@supabase/supabase-js'
 import { downloadFileWithIframe } from '@/lib/utils.ts'
+import { useToast } from '@/components/ui/toast'
 
-function logError(error: PostgrestError) {
-  //TODO send something to user
+function logError(error: any) {
+  //TODO send to db logs
   console.log(error)
+  useToast().toast({
+    title: 'Error',
+    description: 'Something went wrong. Try again.',
+    variant: 'destructive'
+  });
 }
 
 export async function deleteFile(id: string) {
@@ -102,6 +107,19 @@ export async function downloadSharedFile(id: string){
 
 export async function downloadFile(id: string){
   const serverUrl = import.meta.env.VITE_STORAGE_ENDPOINT as string;
-  //TODO token manager
-  //window.open(downloadUrl, '_blank');
+  const { accessToken, user } = useAuthStore();
+
+  const response = await axios.get(serverUrl + `/download-token/file/${id}`, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  });
+
+  const token = response.data.token.id ?? null;
+  if (!token){
+    logError({error: `No token returned for \nfile: ${id} \nowner: ${user?.id}`});
+    return;
+  }
+
+  downloadFileWithIframe(serverUrl + `/download/${token}`);
 }

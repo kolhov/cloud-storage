@@ -40,12 +40,28 @@ export const deleteFolderQuery = (id: string, userId: string) =>
     .eq('id', id)
     .eq('owner', userId);
 
-export const filesQuery = (userid: string, folder: string) =>
+export const filesInFolderQuery = (userid: string, folder: string) =>
   supabase
     .from('files')
     .select()
     .eq('owner', userid)
     .eq('folder', folder);
+
+export const fileQuery = (userid: string, id: string) =>
+  supabase
+    .from('files')
+    .select()
+    .eq('owner', userid)
+    .eq('id', id)
+    .single();
+
+export const folderQuery = (userid: string, id: string) =>
+  supabase
+    .from('folders')
+    .select()
+    .eq('owner', userid)
+    .eq('id', id)
+    .single();
 
 export const publicFileQuery = (id: string) =>
   supabase
@@ -54,3 +70,30 @@ export const publicFileQuery = (id: string) =>
     .eq('id', id)
     .eq('public', true)
     .single();
+
+export const tokenQuery = (id: string) =>
+  supabase
+    .from('download_tokens')
+    .select(`
+    *,
+    folder_id(*),
+    file_id(*)
+    `)
+    .eq('id', id)
+    .single();
+
+export const insertTokenQuery = (item: "folder" | "file", item_id: string) =>
+  supabase
+    .from('download_tokens')
+    .insert({
+      folder_id: item === 'folder' ? item_id : null,
+      file_id: item === 'file' ? item_id : null
+    })
+    .select()
+    .single();
+
+export const deleteTokenQuery = (id: string) =>
+  supabase
+    .from('download_tokens')
+    .delete()
+    .eq('id', id);

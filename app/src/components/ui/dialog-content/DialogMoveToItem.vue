@@ -13,6 +13,7 @@ import { onMounted, ref } from 'vue'
 import DialogFolderTree from '@/components/ui/dialog-content/DialogFolderTree.vue'
 import { storeToRefs } from 'pinia'
 import { useStorageStore } from '@/stores/storageStore.ts'
+import { Icon } from '@iconify/vue'
 
 const props = defineProps<{
   isFile: boolean,
@@ -22,7 +23,7 @@ const props = defineProps<{
 const storageStore = useStorageStore();
 const { foldersTree } = storeToRefs(storageStore);
 
-function moveItem(id: string){
+function moveItem(id: string | null){
   if (props.isFile){
     updateFIleFolder(props.item.id, id);
   } else {
@@ -44,9 +45,18 @@ onMounted(async () => {
       Select a folder to move the {{isFile? 'file' : 'folder'}} to.
     </DialogDescription>
   </DialogHeader>
+  <div class="button folder" @click="moveItem(null)">
+    <Icon icon="akar-icons:home-alt1" class="text-base" />
+    <span class="min-w-24">Home</span>
+  </div>
   <DialogFolderTree @folderSelect="moveItem" v-for="(subItem, index) in foldersTree" :key="index" :item="subItem" />
 </template>
 
 <style scoped>
-
+.folder {
+  @apply flex justify-items-start items-center gap-2 text-sm border-2 p-1.5 rounded w-full
+}
+.button {
+  @apply hover:cursor-pointer hover:bg-muted
+}
 </style>

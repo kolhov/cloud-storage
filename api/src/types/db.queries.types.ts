@@ -1,5 +1,5 @@
 import { QueryData } from '@supabase/supabase-js'
-import { insertFileQuery, filesQuery } from '@/lib/supabase/supabaseQueries'
+import { insertFileQuery, filesInFolderQuery } from '@/lib/supabase/supabaseQueries'
 
 export type InsertFile = QueryData<ReturnType<typeof insertFileQuery>>;
-export type FilesQuery = QueryData<ReturnType<typeof filesQuery>>;
+export type FilesQuery = QueryData<ReturnType<typeof filesInFolderQuery>>;

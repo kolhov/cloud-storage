@@ -5,14 +5,17 @@ import { multerUpload } from '@/lib/multerSettings';
 import {
   deleteFileQuery,
   deleteFolderQuery,
-  filesQuery,
+  fileQuery,
+  filesInFolderQuery,
+  folderQuery,
   insertFileQuery,
-  publicFileQuery
+  insertTokenQuery,
+  publicFileQuery,
+  tokenQuery
 } from '@/lib/supabase/supabaseQueries'
-import { headerToUser } from '@/lib/utils'
+import { deleteToken, headerToUser, logError } from '@/lib/utils'
 import * as fs from 'node:fs'
 import path from 'node:path'
-
 
 dotenv.config();
 const app = express();
@@ -36,7 +39,8 @@ app.post('/upload', multerUpload.single('file'), async (req, res) => {
 
   const {data, error} = await insertFileQuery(req.file, req);
   if (error) {
-     res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
+    res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
+    return;
   }
   console.log(data);
   res.sendStatus(200);
@@ -46,6 +50,7 @@ app.get('/download-shared/:id', async (req, res) => {
   const {data, error} = await publicFileQuery(req.params.id);
   if (error) {
     res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
+    return;
   }
   if (data === null){
     res.sendStatus(403);
@@ -55,10 +60,104 @@ app.get('/download-shared/:id', async (req, res) => {
   const filePath = path.join(process.cwd(), 'storage', data.owner, data.id);
   res.download(filePath, data.name, (err) => {
     if (err){
-      console.error('Download error: ', err);
+      logError('Download error: ', err);
       if (!res.headersSent) res.sendStatus(500);
     }
   });
+});
+
+app.get('/download/:token', async (req, res) => {
+  const {data, error} = await tokenQuery(req.params.token);
+  if (error) {
+    res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
+    await logError('Token query error: ', error);
+    return;
+  }
+  if (data === null){
+    res.sendStatus(404);
+    return;
+  }
+  if (new Date(data.expiration_time) < new Date()) {
+    res.status(403).send('The token has expired.');
+    await deleteToken(data.id);
+    return;
+  }
+
+  if (data.file_id){
+    const file = data.file_id;
+    const filePath = path.join(process.cwd(), 'storage', file.owner, file.id);
+    res.download(filePath, file.name, (err) => {
+      if (err){
+        logError('Download error: ', err);
+        if (!res.headersSent) res.sendStatus(500);
+      }
+    });
+  } else if (data.folder_id) {
+    // TODO bulk download
+    // make archive with all files
+  } else {
+    await logError('Bad token: ', data);
+    res.sendStatus(500);
+  }
+  await deleteToken(data.id);
+});
+
+app.get('/download-token/file/:id', async (req, res) => {
+  const userId = await headerToUser(req);
+  if (!userId){
+    res.sendStatus(403);
+    return;
+  }
+
+  const {data, error} = await fileQuery(userId, req.params.id);
+  if (error) {
+    res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
+    return;
+  }
+  if (data === null){
+    res.sendStatus(403);
+    return;
+  }
+
+  const token = await insertTokenQuery('file', data.id);
+  if (token.error) {
+    res.status(Number(token.error.code)).send(`${token.error.details}\n${token.error.hint}`);
+    return;
+  }
+  if (token.data === null){
+    res.sendStatus(500);
+    return;
+  }
+  res.send({token: token.data});
+});
+
+app.get('/download-token/folder/:id', async (req, res) => {
+  const userId = await headerToUser(req);
+  if (!userId){
+    res.sendStatus(403);
+    return;
+  }
+
+  const {data, error} = await folderQuery(userId, req.params.id);
+  if (error) {
+    res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
+    return;
+  }
+  if (data === null){
+    res.sendStatus(403);
+    return;
+  }
+
+  const token = await insertTokenQuery('folder', data.id);
+  if (token.error) {
+    res.status(Number(token.error.code)).send(`${token.error.details}\n${token.error.hint}`);
+    return;
+  }
+  if (token.data === null){
+    res.sendStatus(500);
+    return;
+  }
+  res.send({token: token.data});
 });
 
 app.delete('/file', async (req, res ) => {
@@ -72,13 +171,13 @@ app.delete('/file', async (req, res ) => {
   try {
     fs.rmSync(filePath);
   } catch (err) {
-    console.error('File deletion error: ', err);
+    await logError('File deletion error: ', err);
   }
 
   const {error} = await deleteFileQuery(req.body.id, userId);
   if (error){
     res.sendStatus(500);
-    console.error('Delete file query error: ', error);
+    await logError('Delete file query error: ', error);
     return;
   }
   res.sendStatus(200);
@@ -91,10 +190,10 @@ app.delete('/folder', async (req, res ) => {
     return;
   }
 
-  const {data, error} = await filesQuery(userId, req.body.id);
+  const {data, error} = await filesInFolderQuery(userId, req.body.id);
   if (error) {
     res.sendStatus(500);
-    console.error('Files query error: ', error);
+    await logError('Files query error: ', error);
     return;
   }
 
@@ -104,7 +203,7 @@ app.delete('/folder', async (req, res ) => {
       try {
         fs.rmSync(filePath);
       } catch (err) {
-        console.error('File deletion error: ', err);
+        logError('File deletion error: ', err);
       }
     });
   }
@@ -112,7 +211,7 @@ app.delete('/folder', async (req, res ) => {
   const del = await deleteFolderQuery(req.body.id, userId);
   if (del.error){
     res.sendStatus(500);
-    console.error('Delete folder query error: ', del.error);
+    await logError('Delete folder query error: ', del.error);
     return;
   }
   res.sendStatus(200);
