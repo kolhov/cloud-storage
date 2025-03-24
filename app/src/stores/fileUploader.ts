@@ -72,16 +72,16 @@ export const useFileUploader = defineStore('file-uploader', () => {
     }
   }
 
-  async function uploadFiles(data: DataTransferItemList, folderId: string | null) {
-    const entries: FileSystemEntryWithId[] = [];
+  async function dataTransferToFilesWithFolderId(data: DataTransferItemList, folderId: string | null) {
+    const entries: FileSystemEntryWithId[] = []
 
     for (const item of [...data]) {
-      const entry = item.webkitGetAsEntry();
-      if (!entry) continue;
+      const entry = item.webkitGetAsEntry()
+      if (!entry) continue
 
-      let fileEntry = await processEntry(entry, folderId);
-      if (!Array.isArray(fileEntry)) entries.push(fileEntry);
-      else entries.push(...fileEntry);
+      let fileEntry = await processEntry(entry, folderId)
+      if (!Array.isArray(fileEntry)) entries.push(fileEntry)
+      else entries.push(...fileEntry)
     }
 
     const files: FileWithFolderId[] = await Promise.all(entries.map(async (entry) => {
@@ -89,7 +89,16 @@ export const useFileUploader = defineStore('file-uploader', () => {
         file: await getFile(entry.entry),
         folderId: entry.folderId
       } as FileWithFolderId
-    }));
+    }))
+    return files
+  }
+
+  async function uploadFiles(data: DataTransferItemList | FileWithFolderId[], folderId: string | null) {
+    let files: FileWithFolderId[];
+
+    if (data instanceof DataTransferItemList)
+    files = await dataTransferToFilesWithFolderId(data, folderId)
+    else files = data;
 
     if (files.length > 0) {
       await Promise.all(files.map((file) => {

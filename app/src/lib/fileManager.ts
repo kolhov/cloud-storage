@@ -6,7 +6,7 @@ import {
   updateFilePublicQuery,
   updateFolderPublicQuery,
   updateFileFolderQuery,
-  updateFolderFolderQuery
+  updateFolderFolderQuery, insertFolderQuery
 } from '@/lib/supabase/supabaseQueries.ts'
 import { useStorageStore } from '@/stores/storageStore.ts'
 import { downloadFileWithIframe } from '@/lib/utils.ts'
@@ -168,4 +168,22 @@ export async function downloadFile(id: string){
   }
 
   downloadFileWithIframe(serverUrl + `/download/${token}`);
+}
+
+export async function createFolder(name: string){
+  const { user } = useAuthStore();
+  if (!user) {
+    logError('Not logged in');
+    return;
+  }
+  const { data, error} = await insertFolderQuery({ name, owner: user.id })
+  if (error) {
+    logError(error);
+    return;
+  }
+  await useStorageStore().refreshFolders();
+
+  useToast().toast({
+    description: `Folder created: ${data?.name}`,
+  });
 }

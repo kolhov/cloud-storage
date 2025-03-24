@@ -82,12 +82,7 @@ export const sharedSingleFileQuery = (id: string) => {
 export const insertFolderQuery = (folder: FolderInsert) => {
   return supabase
     .from('folders')
-    .insert({
-      name: folder.name,
-      folder: folder.folder,
-      owner: folder.owner,
-      isPublic: folder.public
-    } as FolderInsert)
+    .insert(folder)
     .select()
     .single();
 }
