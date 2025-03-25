@@ -3,6 +3,7 @@ import type { Ref } from 'vue'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import bytes from 'bytes';
+import prettyMilliseconds from 'pretty-ms'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -26,8 +27,13 @@ export function convertDateFromIso(isoDate: string){
   })
 }
 
-export function bytesToString(byte: number){
-  return bytes(byte, {unitSeparator: ' '});
+export function bytesToString(byte: number | undefined | null){
+  if (byte) return bytes(byte, {unitSeparator: ' '});
+  return null;
+}
+
+export function secondsToString(seconds: number | undefined){
+  if (seconds) return prettyMilliseconds(seconds * 1000, { secondsDecimalDigits: 0 });
 }
 
 export function downloadFileWithIframe(downloadUrl: string) {

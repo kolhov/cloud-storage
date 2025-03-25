@@ -7,12 +7,34 @@ import mime from 'mime';
 import { ensureFolder } from '@/lib/supabase/ensureFolder.ts'
 import { useStorageStore } from '@/stores/storageStore.ts'
 import type { FileSystemEntryWithId, FileWithFolderId } from '@/types/expanded.file.system.types.ts'
+import type { UploadProgress } from '@/types/upload.progress.ts'
+import { bytesToString, secondsToString } from '@/lib/utils.ts'
 
 export const useFileUploader = defineStore('file-uploader', () => {
   const isLoading = ref<boolean | null>(null);
   const url = import.meta.env.VITE_STORAGE_ENDPOINT as string;
-  // TODO add axios on upload progress
-  const loadingFiles = ref<{progressBar: number}>();
+  const loadingFiles = ref<Record<string, UploadProgress>>({});
+
+  function addToLoadingFiles(file: File, mime: string){
+    const id = crypto.randomUUID();
+    loadingFiles.value[id] = {
+      name: file.name,
+      icon: mimeToIcon(mime),
+      progressBar: 0,
+      complete: false
+    } as UploadProgress;
+
+    return id;
+  }
+
+  function delFromLoadingFiles(id: string){
+    let msTillDeletion = 3 * 1000;
+    loadingFiles.value[id].complete = true;
+
+    setTimeout(() => {
+      delete loadingFiles.value[id];
+    }, msTillDeletion);
+  }
 
   async function simpleUpload(file: File, accessToken: string, folderId: string | null) {
     let fileMime = file.type === ''
@@ -20,18 +42,31 @@ export const useFileUploader = defineStore('file-uploader', () => {
       : file.type;
     if (!fileMime) fileMime = '';
 
+    let trackerIndex = addToLoadingFiles(file, fileMime);
+
     let formData = new FormData();
     formData.append('file', file, encodeURIComponent(file.name));
     formData.append('folderId', folderId ?? 'null');
     formData.append('icon', mimeToIcon(fileMime));
     formData.append('mime', fileMime);
 
-    return await axios.post(url + '/upload', formData, {
+    const response = await axios.post(url + '/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         'Authorization': `Bearer ${accessToken}`
+      },
+      onUploadProgress: (progressEvent) => {
+        const file = loadingFiles.value[trackerIndex];
+        file.total = progressEvent.total ? bytesToString(progressEvent.total) : undefined;
+        file.progressBar = (progressEvent.progress ?? 0.02) * 100;
+        file.loaded = bytesToString(progressEvent.loaded);
+        file.rate = bytesToString(progressEvent.rate);
+        file.duration = secondsToString(progressEvent.estimated);
       }
     });
+
+    delFromLoadingFiles(trackerIndex);
+    return response;
   }
 
   async function uploadFile(file: File, folderId: string | null) {

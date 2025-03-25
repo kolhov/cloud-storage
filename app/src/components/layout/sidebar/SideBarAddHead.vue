@@ -23,10 +23,10 @@ import { useFileUploader } from '@/stores/fileUploader.ts'
 import { useStorageStore } from '@/stores/storageStore.ts'
 import type { FileWithFolderId } from '@/types/expanded.file.system.types.ts'
 
-const { isMobile } = useSidebar()
+const { isMobile } = useSidebar();
 
 function addFolder(name: string) {
-  createFolder(name)
+  createFolder(name);
 }
 
 function uploadFileClicked() {
