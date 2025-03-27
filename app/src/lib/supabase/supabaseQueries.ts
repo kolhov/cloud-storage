@@ -49,6 +49,11 @@ export const getAllFoldersQuery = (userid: string) => supabase
   .select()
   .eq('owner', userid);
 
+export const getAllFilesQuery = (userid: string) => supabase
+  .from('files')
+  .select()
+  .eq('owner', userid);
+
 export const sharedFoldersQuery = (folder: string) => {
   return supabase.from('folders')
     .select()

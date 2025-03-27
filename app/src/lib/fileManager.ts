@@ -6,12 +6,13 @@ import {
   updateFilePublicQuery,
   updateFolderPublicQuery,
   updateFileFolderQuery,
-  updateFolderFolderQuery, insertFolderQuery
+  updateFolderFolderQuery, insertFolderQuery, getAllFoldersQuery, getAllFilesQuery
 } from '@/lib/supabase/supabaseQueries.ts'
 import { useStorageStore } from '@/stores/storageStore.ts'
 import { downloadFileWithIframe } from '@/lib/utils.ts'
 import { useToast, ToastAction } from '@/components/ui/toast'
 import { h } from 'vue'
+import type { AllFiles, AllFolders } from '@/lib/supabase/supabaseQueryTypes.ts'
 
 function logError(error: any) {
   //TODO send to db logs
@@ -186,4 +187,34 @@ export async function createFolder(name: string){
   useToast().toast({
     description: `Folder created: ${data?.name}`,
   });
+}
+
+export async function getAllFolders(): Promise<AllFolders | null>{
+  const { user } = useAuthStore();
+  if (!user) {
+    logError('Not logged in');
+    return null;
+  }
+
+  const { data, error} = await getAllFoldersQuery(user.id);
+  if (error) {
+    logError(error);
+    return null;
+  }
+  return data;
+}
+
+export async function getAllFiles(): Promise<AllFiles | null>{
+  const { user } = useAuthStore();
+  if (!user) {
+    logError('Not logged in');
+    return null;
+  }
+
+  const { data, error} = await getAllFilesQuery(user.id);
+  if (error) {
+    logError(error);
+    return null;
+  }
+  return data;
 }

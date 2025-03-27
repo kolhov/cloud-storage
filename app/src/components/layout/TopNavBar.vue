@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Icon } from '@iconify/vue'
-import Input from '../ui/input/Input.vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/authStore.ts'
+import SearchBar from '@/components/layout/SearchBar.vue'
 
-const router = useRouter();
-const {user} = storeToRefs(useAuthStore());
+const router = useRouter()
+const { user } = storeToRefs(useAuthStore())
 
 async function logoutEvent() {
   const { logout } = await import('@/lib/supabase/supaAuth.ts')
@@ -22,15 +24,10 @@ async function logoutEvent() {
 </script>
 
 <template>
-  <nav class="h-16 border-b bg-muted/40 flex gap-2 justify-between px-6 items-center">
+  <nav class="h-16 border-b bg-muted/40 flex gap-2 justify-start px-6 items-center w-full">
     <slot />
-    <form class="relative h-fit w-full max-w-96">
-      <Icon
-        class="absolute top-[50%] translate-y-[-50%] left-2.5 text-muted-foreground"
-        icon="lucide:search"
-      ></Icon>
-      <Input class="w-full pl-8 bg-background" type="text" placeholder="Search ..." />
-    </form>
+    <div class="flex gap-2 w-full justify-end items-center">
+    <SearchBar/>
     <DropdownMenu v-if="user">
       <DropdownMenuTrigger>
         <Avatar>
@@ -44,5 +41,6 @@ async function logoutEvent() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </div>
   </nav>
 </template>
