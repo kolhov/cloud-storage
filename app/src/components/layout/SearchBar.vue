@@ -38,7 +38,7 @@ watch(() => open.value, async () => {
   </Button>
   <CommandDialog v-model:open="open">
     <CommandInput placeholder="Type a command or search..." />
-    <CommandList>
+    <CommandList class="scroll">
       <CommandEmpty>No results found.</CommandEmpty>
       <CommandGroup heading="Folders">
         <CommandItem v-if="folders" v-for="item in folders" :value="item.name" asChild>
@@ -62,5 +62,10 @@ watch(() => open.value, async () => {
 </template>
 
 <style scoped>
-
+.scroll::-webkit-scrollbar {
+  @apply bg-muted w-[8px]
+}
+.scroll::-webkit-scrollbar-thumb {
+  @apply bg-slate-600 rounded-full
+}
 </style>

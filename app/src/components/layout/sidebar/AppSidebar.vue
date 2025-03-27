@@ -38,7 +38,7 @@ const data = {
     <SidebarHeader>
       <SideBarAddHead />
     </SidebarHeader>
-    <SidebarContent>
+    <SidebarContent class="scroll">
       <SidebarGroup>
         <SidebarGroupLabel>My drive</SidebarGroupLabel>
         <SidebarGroupContent>
@@ -71,3 +71,12 @@ const data = {
     </SidebarContent>
   </Sidebar>
 </template>
+
+<style scoped>
+.scroll::-webkit-scrollbar {
+  @apply bg-muted w-[8px]
+}
+.scroll::-webkit-scrollbar-thumb {
+  @apply bg-slate-600 rounded-full
+}
+</style>
