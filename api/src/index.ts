@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { multerUpload } from '@/lib/multerSettings';
 import {
+  allFoldersQuery,
   deleteFileQuery,
   deleteFolderQuery,
   fileQuery,
@@ -17,6 +18,9 @@ import { deleteToken, logError } from '@/lib/utils'
 import * as fs from 'node:fs'
 import path from 'node:path'
 import { authorize } from '@/lib/authorization'
+import { FilesInFolder } from '@/types/db.queries.types'
+import { prepareFilesMetadataToArchive } from '@/lib/archive/utils'
+import { archiveFiles } from '@/lib/archive/archiver'
 
 dotenv.config();
 const app = express();
@@ -47,7 +51,7 @@ app.post('/upload', multerUpload.single('file'), async (req, res) => {
   res.sendStatus(200);
 });
 
-app.get('/download-shared/:id', async (req, res) => {
+app.get('/download/shared/:id', async (req, res) => {
   const {data, error} = await publicFileQuery(req.params.id);
   if (error) {
     res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
@@ -93,9 +97,9 @@ app.get('/download/:token', async (req, res) => {
         if (!res.headersSent) res.sendStatus(500);
       }
     });
-  } else if (data.folder_id) {
+  } else if (data.archive_id) {
     // TODO bulk download
-    // make archive with all files
+    // delete archive after all in any case
   } else {
     await logError('Bad token: ', data);
     res.sendStatus(500);
@@ -110,8 +114,8 @@ app.get('/download-token/file/:id', authorize, async (req, res) => {
     res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
     return;
   }
-  if (data === null){
-    res.sendStatus(403);
+  if (data === null) {
+    res.sendStatus(404);
     return;
   }
 
@@ -128,18 +132,18 @@ app.get('/download-token/file/:id', authorize, async (req, res) => {
 });
 
 app.get('/download-token/folder/:id', authorize, async (req, res) => {
+  let dataToArchive: Record<string, FilesInFolder> = {};
   const userId = req.body.userId;
-  const {data, error} = await folderQuery(userId, req.params.id);
-  if (error) {
-    res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
-    return;
-  }
-  if (data === null){
-    res.sendStatus(403);
-    return;
-  }
+  const folderId = req.params.id;
 
-  const token = await insertTokenQuery('folder', data.id);
+  dataToArchive = await prepareFilesMetadataToArchive(userId, folderId);
+  if (Object.keys(dataToArchive).length <= 0) {
+    res.sendStatus(404);
+    return;
+  }
+  const archiveId = await archiveFiles(dataToArchive);
+
+  const token = await insertTokenQuery('file', archiveId);
   if (token.error) {
     res.status(Number(token.error.code)).send(`${token.error.details}\n${token.error.hint}`);
     return;

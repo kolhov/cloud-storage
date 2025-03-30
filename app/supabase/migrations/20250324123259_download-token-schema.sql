@@ -6,5 +6,5 @@ create table download_tokens
     created_at      timestamptz      default now()                        not null,
     expiration_time timestamptz      default now() + INTERVAL '5 minutes' not null,
     file_id         uuid references files (id) on delete cascade,
-    folder_id       uuid references folders (id) on delete cascade
+    archive_id      uuid
 );

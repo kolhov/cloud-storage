@@ -43,7 +43,11 @@ export const deleteFolderQuery = (id: string, userId: string) =>
 export const filesInFolderQuery = (userid: string, folder: string) =>
   supabase
     .from('files')
-    .select()
+    .select(`
+    *,
+    folder(
+    name
+    )`)
     .eq('owner', userid)
     .eq('folder', folder);
 
@@ -63,6 +67,13 @@ export const folderQuery = (userid: string, id: string) =>
     .eq('id', id)
     .single();
 
+export const allFoldersQuery = (userid: string, id: string) =>
+  supabase
+    .from('folders')
+    .select()
+    .eq('owner', userid)
+    .eq('folder', id);
+
 export const publicFileQuery = (id: string) =>
   supabase
     .from('files')
@@ -76,17 +87,16 @@ export const tokenQuery = (id: string) =>
     .from('download_tokens')
     .select(`
     *,
-    folder_id(*),
     file_id(*)
     `)
     .eq('id', id)
     .single();
 
-export const insertTokenQuery = (item: "folder" | "file", item_id: string) =>
+export const insertTokenQuery = (item: "archive" | "file", item_id: string) =>
   supabase
     .from('download_tokens')
     .insert({
-      folder_id: item === 'folder' ? item_id : null,
+      archive_id: item === 'archive' ? item_id : null,
       file_id: item === 'file' ? item_id : null
     })
     .select()

@@ -3,3 +3,4 @@ import { insertFileQuery, filesInFolderQuery } from '@/lib/supabase/supabaseQuer
 
 export type InsertFile = QueryData<ReturnType<typeof insertFileQuery>>;
 export type FilesQuery = QueryData<ReturnType<typeof filesInFolderQuery>>;
+export type FilesInFolder = QueryData<ReturnType<typeof filesInFolderQuery>>;
