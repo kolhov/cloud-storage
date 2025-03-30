@@ -10,7 +10,7 @@ const {loadingFiles} = storeToRefs(useFileUploader());
 <template>
   <div v-for="(file, index) in loadingFiles"
        :key="index"
-       class="flex sm:flex-row flex-col justify-between items-center border-y-[1px]"
+       class="flex sm:flex-row py-2 flex-col justify-between items-center border-y-[1px]"
   >
     <span class="sm:w-1/3 flex flex-row justify-start items-center pl-2">
       <Icon :icon="file.icon" class="text-lg" />

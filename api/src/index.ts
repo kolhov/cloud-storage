@@ -13,9 +13,10 @@ import {
   publicFileQuery,
   tokenQuery
 } from '@/lib/supabase/supabaseQueries'
-import { deleteToken, headerToUser, logError } from '@/lib/utils'
+import { deleteToken, logError } from '@/lib/utils'
 import * as fs from 'node:fs'
 import path from 'node:path'
+import { authorize } from '@/lib/authorization'
 
 dotenv.config();
 const app = express();
@@ -102,13 +103,8 @@ app.get('/download/:token', async (req, res) => {
   await deleteToken(data.id);
 });
 
-app.get('/download-token/file/:id', async (req, res) => {
-  const userId = await headerToUser(req);
-  if (!userId){
-    res.sendStatus(403);
-    return;
-  }
-
+app.get('/download-token/file/:id', authorize, async (req, res) => {
+  const userId = req.body.userId;
   const {data, error} = await fileQuery(userId, req.params.id);
   if (error) {
     res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
@@ -131,13 +127,8 @@ app.get('/download-token/file/:id', async (req, res) => {
   res.send({token: token.data});
 });
 
-app.get('/download-token/folder/:id', async (req, res) => {
-  const userId = await headerToUser(req);
-  if (!userId){
-    res.sendStatus(403);
-    return;
-  }
-
+app.get('/download-token/folder/:id', authorize, async (req, res) => {
+  const userId = req.body.userId;
   const {data, error} = await folderQuery(userId, req.params.id);
   if (error) {
     res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
@@ -160,13 +151,8 @@ app.get('/download-token/folder/:id', async (req, res) => {
   res.send({token: token.data});
 });
 
-app.delete('/file', async (req, res ) => {
-  const userId = await headerToUser(req);
-  if (!userId){
-    res.sendStatus(403);
-    return;
-  }
-
+app.delete('/file', authorize, async (req, res ) => {
+  const userId = req.body.userId;
   const filePath = path.join(storagePath, userId, req.body.id)
   try {
     fs.rmSync(filePath);
@@ -183,13 +169,8 @@ app.delete('/file', async (req, res ) => {
   res.sendStatus(200);
 });
 
-app.delete('/folder', async (req, res ) => {
-  const userId = await headerToUser(req);
-  if (!userId){
-    res.sendStatus(403);
-    return;
-  }
-
+app.delete('/folder', authorize, async (req, res ) => {
+  const userId = req.body.userId;
   const {data, error} = await filesInFolderQuery(userId, req.body.id);
   if (error) {
     res.sendStatus(500);
