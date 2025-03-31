@@ -4,15 +4,16 @@ import * as path from 'node:path'
 import archiver from 'archiver';
 import { logError } from '@/lib/utils'
 
+export const TEMP_FOLDER_PATH = path.join(process.cwd(), "storage", ".temp");
+
 export async function archiveFiles(dataToArchive: Record<string, FilesInFolder>): Promise<string>{
   const archiveId = crypto.randomUUID();
 
-  const tempFolderPath = path.join(process.cwd(), "storage", ".temp");
-  if (!fs.existsSync(tempFolderPath)){
-    fs.mkdirSync(tempFolderPath, {recursive: true});
+  if (!fs.existsSync(TEMP_FOLDER_PATH)){
+    fs.mkdirSync(TEMP_FOLDER_PATH, {recursive: true});
   }
 
-  const output = fs.createWriteStream(path.join(tempFolderPath, archiveId));
+  const output = fs.createWriteStream(path.join(TEMP_FOLDER_PATH, archiveId));
   const archive = archiver('zip', {
     zlib: { level: 9 }
   });
@@ -34,10 +35,10 @@ export async function archiveFiles(dataToArchive: Record<string, FilesInFolder>)
     });
   }
 
-  await new Promise<void>((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     archive.on('close', () => {
       console.log(`Archive created: ${archiveId} \n${JSON.stringify(dataToArchive, null, 2)}`);
-      resolve();
+      setTimeout(() => resolve(archiveId), 10);
     });
 
     archive.on('error', (err) => {
@@ -47,6 +48,4 @@ export async function archiveFiles(dataToArchive: Record<string, FilesInFolder>)
 
     archive.finalize();
   });
-
-  return archiveId;
 }

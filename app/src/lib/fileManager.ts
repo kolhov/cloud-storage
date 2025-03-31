@@ -141,9 +141,19 @@ export async function updateFolderFolder(id: string, newFolderId: string | null)
 
 export async function downloadSharedFile(id: string){
   const serverUrl = import.meta.env.VITE_STORAGE_ENDPOINT as string;
-  const downloadUrl = serverUrl + `/download/shared/${id}`;
+  const downloadUrl = serverUrl + `/download/shared/file/${id}`;
   useToast().toast({
     description: 'Preparing the file.',
+  });
+
+  downloadFileWithIframe(downloadUrl);
+}
+
+export async function downloadSharedFolder(id: string){
+  const serverUrl = import.meta.env.VITE_STORAGE_ENDPOINT as string;
+  const downloadUrl = serverUrl + `/download/shared/folder/${id}`;
+  useToast().toast({
+    description: 'Preparing the files.',
   });
 
   downloadFileWithIframe(downloadUrl);

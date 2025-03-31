@@ -16,7 +16,7 @@ import { computed, ref } from 'vue'
 import type { Files, Folder } from '@/lib/supabase/supabaseQueryTypes.ts'
 import {
   downloadFile, downloadFolder,
-  downloadSharedFile,
+  downloadSharedFile, downloadSharedFolder,
   updateFilePublic,
   updateFolderPublic
 } from '@/lib/fileManager.ts'
@@ -24,8 +24,10 @@ import DialogDeleteItem from '@/components/ui/dialog-content/DialogDeleteItem.vu
 import DialogMoveToItem from '@/components/ui/dialog-content/DialogMoveToItem.vue'
 import DialogRenameItem from '@/components/ui/dialog-content/DialogRenameItem.vue'
 import { useToast } from '@/components/ui/toast'
+import { useRoute } from 'vue-router'
 
 const { toast } = useToast();
+const route = useRoute();
 const prop = defineProps<{
   item: Files[0] | Folder,
 }>();
@@ -86,7 +88,8 @@ function download(){
     if (isFile.value) {
       downloadSharedFile(prop.item.id);
     } else {
-
+      if (route.path === '/shared/folder') downloadSharedFolder(prop.item.id);
+      else downloadFolder(prop.item.id);
     }
     return;
   }

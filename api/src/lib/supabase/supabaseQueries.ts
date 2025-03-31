@@ -51,6 +51,17 @@ export const filesInFolderQuery = (userid: string, folder: string) =>
     .eq('owner', userid)
     .eq('folder', folder);
 
+export const sharedFilesInFolderQuery = (folder: string) =>
+  supabase
+    .from('files')
+    .select(`
+    *,
+    folder(
+    name
+    )`)
+    .eq('public', true)
+    .eq('folder', folder);
+
 export const fileQuery = (userid: string, id: string) =>
   supabase
     .from('files')
@@ -72,6 +83,13 @@ export const allFoldersQuery = (userid: string, id: string) =>
     .from('folders')
     .select()
     .eq('owner', userid)
+    .eq('folder', id);
+
+export const sharedFoldersInFolderQuery = (id: string) =>
+  supabase
+    .from('folders')
+    .select()
+    .eq('public', true)
     .eq('folder', id);
 
 export const publicFileQuery = (id: string) =>

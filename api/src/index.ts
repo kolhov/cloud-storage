@@ -3,12 +3,10 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { multerUpload } from '@/lib/multerSettings';
 import {
-  allFoldersQuery,
   deleteFileQuery,
   deleteFolderQuery,
   fileQuery,
   filesInFolderQuery,
-  folderQuery,
   insertFileQuery,
   insertTokenQuery,
   publicFileQuery,
@@ -19,8 +17,8 @@ import * as fs from 'node:fs'
 import path from 'node:path'
 import { authorize } from '@/lib/authorization'
 import { FilesInFolder } from '@/types/db.queries.types'
-import { prepareFilesMetadataToArchive } from '@/lib/archive/utils'
-import { archiveFiles } from '@/lib/archive/archiver'
+import { prepareFilesMetadataToArchive, prepareSharedFilesMetadataToArchive } from '@/lib/archive/utils'
+import { archiveFiles, TEMP_FOLDER_PATH } from '@/lib/archive/archiver'
 
 dotenv.config();
 const app = express();
@@ -51,7 +49,7 @@ app.post('/upload', multerUpload.single('file'), async (req, res) => {
   res.sendStatus(200);
 });
 
-app.get('/download/shared/:id', async (req, res) => {
+app.get('/download/shared/file/:id', async (req, res) => {
   const {data, error} = await publicFileQuery(req.params.id);
   if (error) {
     res.status(Number(error.code)).send(`${error.details}\n${error.hint}`);
@@ -68,6 +66,33 @@ app.get('/download/shared/:id', async (req, res) => {
       logError('Download error: ', err);
       if (!res.headersSent) res.sendStatus(500);
     }
+  });
+});
+
+app.get('/download/shared/folder/:id', async (req, res) => {
+  const folderId = req.params.id;
+  const dataToArchive = await prepareSharedFilesMetadataToArchive(folderId);
+  if (Object.keys(dataToArchive).length <= 0) {
+    res.sendStatus(404);
+    return;
+  }
+
+  let archiveId: string;
+  try {
+    archiveId = await archiveFiles(dataToArchive);
+  } catch (err){
+    logError('Archiving error: ', err);
+    res.status(500).send('Archiving error');
+    return;
+  }
+
+  const filePath = path.join(TEMP_FOLDER_PATH, archiveId);
+  res.download(filePath, `${archiveId.substring(0, 5)}.zip`, (err) => {
+    if (err){
+      logError('Download error: ', err);
+      if (!res.headersSent) res.sendStatus(500);
+    }
+    deleteArchive(archiveId);
   });
 });
 
