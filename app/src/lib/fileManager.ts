@@ -156,7 +156,7 @@ export async function downloadFile(id: string){
     description: 'Preparing the file.',
   });
 
-  const response = await axios.get(serverUrl + `/download-token/file/${id}`, {
+  const response = await axios.get(serverUrl + `/download/token/file/${id}`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`
     }
@@ -165,6 +165,28 @@ export async function downloadFile(id: string){
   const token = response.data.token.id ?? null;
   if (!token){
     logError({error: `No token returned for \nfile: ${id} \nowner: ${user?.id}`});
+    return;
+  }
+
+  downloadFileWithIframe(serverUrl + `/download/${token}`);
+}
+
+export async function downloadFolder(id: string){
+  const serverUrl = import.meta.env.VITE_STORAGE_ENDPOINT as string;
+  const { accessToken, user } = useAuthStore();
+  useToast().toast({
+    description: 'Preparing the files to download.',
+  });
+
+  const response = await axios.get(serverUrl + `/download/token/folder/${id}`, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  });
+
+  const token = response.data.token.id ?? null;
+  if (!token){
+    logError({error: `No token returned for \nfolder: ${id} \nowner: ${user?.id}`});
     return;
   }
 

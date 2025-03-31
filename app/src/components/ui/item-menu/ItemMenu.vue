@@ -15,7 +15,7 @@ import {
 import { computed, ref } from 'vue'
 import type { Files, Folder } from '@/lib/supabase/supabaseQueryTypes.ts'
 import {
-  downloadFile,
+  downloadFile, downloadFolder,
   downloadSharedFile,
   updateFilePublic,
   updateFolderPublic
@@ -93,7 +93,7 @@ function download(){
   if (isFile.value) {
     downloadFile(prop.item.id);
   } else {
-
+    downloadFolder(prop.item.id);
   }
 }
 </script>
@@ -106,7 +106,7 @@ function download(){
               class="hover:cursor-pointer hover:bg-muted rounded-full p-2 box-content" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem v-if="isFile" @click="download">Download</DropdownMenuItem>
+        <DropdownMenuItem @click="download">Download</DropdownMenuItem>
 
         <DialogTrigger asChild @click="setDialog(dialog.moveTo)">
           <DropdownMenuItem>

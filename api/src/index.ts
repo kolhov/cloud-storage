@@ -14,7 +14,7 @@ import {
   publicFileQuery,
   tokenQuery
 } from '@/lib/supabase/supabaseQueries'
-import { deleteToken, logError } from '@/lib/utils'
+import { deleteArchive, deleteToken, logError } from '@/lib/utils'
 import * as fs from 'node:fs'
 import path from 'node:path'
 import { authorize } from '@/lib/authorization'
@@ -85,6 +85,9 @@ app.get('/download/:token', async (req, res) => {
   if (new Date(data.expiration_time) < new Date()) {
     res.status(403).send('The token has expired.');
     await deleteToken(data.id);
+    if (data.archive_id){
+      deleteArchive(data.archive_id);
+    }
     return;
   }
 
@@ -98,16 +101,24 @@ app.get('/download/:token', async (req, res) => {
       }
     });
   } else if (data.archive_id) {
-    // TODO bulk download
-    // delete archive after all in any case
+    const file = data.archive_id;
+    const filePath = path.join(process.cwd(), 'storage', '.temp', file);
+    res.download(filePath, `${file.substring(0, 5)}.zip`, (err) => {
+      if (err){
+        logError('Download error: ', err);
+        if (!res.headersSent) res.sendStatus(500);
+      }
+      deleteArchive(file);
+    });
   } else {
     await logError('Bad token: ', data);
     res.sendStatus(500);
   }
+
   await deleteToken(data.id);
 });
 
-app.get('/download-token/file/:id', authorize, async (req, res) => {
+app.get('/download/token/file/:id', authorize, async (req, res) => {
   const userId = req.body.userId;
   const {data, error} = await fileQuery(userId, req.params.id);
   if (error) {
@@ -131,7 +142,7 @@ app.get('/download-token/file/:id', authorize, async (req, res) => {
   res.send({token: token.data});
 });
 
-app.get('/download-token/folder/:id', authorize, async (req, res) => {
+app.get('/download/token/folder/:id', authorize, async (req, res) => {
   let dataToArchive: Record<string, FilesInFolder> = {};
   const userId = req.body.userId;
   const folderId = req.params.id;
@@ -141,9 +152,17 @@ app.get('/download-token/folder/:id', authorize, async (req, res) => {
     res.sendStatus(404);
     return;
   }
-  const archiveId = await archiveFiles(dataToArchive);
 
-  const token = await insertTokenQuery('file', archiveId);
+  let archiveId: string;
+  try {
+    archiveId = await archiveFiles(dataToArchive);
+  } catch (err){
+    logError('Archiving error: ', err);
+    res.status(500).send('Archiving error');
+    return;
+  }
+
+  const token = await insertTokenQuery('archive', archiveId);
   if (token.error) {
     res.status(Number(token.error.code)).send(`${token.error.details}\n${token.error.hint}`);
     return;
