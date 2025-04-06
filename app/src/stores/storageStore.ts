@@ -54,6 +54,12 @@ export const useStorageStore = defineStore('storage', () => {
     fetchFolders()
   }
 
+  function cleanStore(){
+    files.value = null;
+    folders.value = null;
+    foldersTree.value = null;
+  }
+
   return {
     files,
     folders,
@@ -63,7 +69,8 @@ export const useStorageStore = defineStore('storage', () => {
     setCurrentFolderId,
     refreshFolders,
     refreshFiles,
-    refreshFoldersTree
+    refreshFoldersTree,
+    cleanStore
   }
 });
 

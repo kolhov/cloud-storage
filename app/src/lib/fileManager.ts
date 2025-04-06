@@ -203,13 +203,13 @@ export async function downloadFolder(id: string){
   downloadFileWithIframe(serverUrl + `/download/${token}`);
 }
 
-export async function createFolder(name: string){
+export async function createFolder(name: string, folder: string | null){
   const { user } = useAuthStore();
   if (!user) {
     logError('Not logged in');
     return;
   }
-  const { data, error} = await insertFolderQuery({ name, owner: user.id })
+  const { data, error} = await insertFolderQuery({ name, owner: user.id, folder })
   if (error) {
     logError(error);
     return;

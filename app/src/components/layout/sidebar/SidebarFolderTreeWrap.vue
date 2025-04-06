@@ -2,16 +2,17 @@
 import SidebarFolderTree from '@/components/layout/sidebar/SidebarFolderTree.vue'
 import type { FolderTreeNode } from '@/types/folder.tree.type.ts'
 import { useStorageStore } from '@/stores/storageStore.ts'
-import { nextTick, onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/authStore.ts'
 
 const props = defineProps<{
   items: FolderTreeNode[] | null
 }>()
 
-onMounted( async () => {
-  setTimeout(async () => {
-    await useStorageStore().refreshFoldersTree();
-  }, 1000)
+const {user} = storeToRefs(useAuthStore());
+watch(() => user.value,(user) => {
+  if (user) useStorageStore().refreshFoldersTree();
 })
 </script>
 

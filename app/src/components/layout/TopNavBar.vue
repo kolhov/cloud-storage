@@ -10,15 +10,19 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/authStore.ts'
 import SearchBar from '@/components/layout/SearchBar.vue'
+import { useStorageStore } from '@/stores/storageStore.ts'
 
-const router = useRouter()
-const { user } = storeToRefs(useAuthStore())
+const router = useRouter();
+const { user } = storeToRefs(useAuthStore());
 
 async function logoutEvent() {
-  const { logout } = await import('@/lib/supabase/supaAuth.ts')
-  const isLoggedOut = await logout()
+  const { logout } = await import('@/lib/supabase/supaAuth.ts');
+  const isLoggedOut = await logout();
 
-  if (isLoggedOut) router.push('/login')
+  if (isLoggedOut) {
+    useStorageStore().cleanStore();
+    router.push('/login');
+  }
 }
 
 </script>
