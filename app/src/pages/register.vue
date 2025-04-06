@@ -8,6 +8,8 @@ import {ref} from "vue";
 import {supabase} from "@/lib/supabase/supabaseClient.ts";
 import {useRouter} from "vue-router";
 import {register} from "@/lib/supabase/supaAuth.ts";
+import { watchDebounced } from '@vueuse/core'
+import { useFormErrors } from '@/composables/formErrors.ts'
 
 const router = useRouter()
 const formData = ref({
@@ -24,6 +26,13 @@ async function signup(){
   if (isRegistered) router.push('/')
 }
 
+const { handleServerError, serverError, loginFormValidation, formErrors } = useFormErrors();
+watchDebounced(
+  formData,
+  () => {
+    loginFormValidation(formData.value)
+  }, { debounce: 1000, deep: true }
+)
 </script>
 
 <template>
@@ -37,31 +46,22 @@ async function signup(){
       </CardHeader>
       <CardContent>
         <div class="flex flex-col gap-4 mb-4 justify-center items-center">
-          <Button variant="outline" class="w-full"> Register with Google</Button>
+          <Button variant="outline" disabled class="w-full"> Register with Google</Button>
           <Separator label="Or"/>
         </div>
         <form class="grid gap-4" @submit.prevent="signup">
           <div class="grid gap-2">
-            <Label id="username" class="text-left">Username</Label>
-            <Input id="username" type="text" placeholder="johndoe19" required
-                   v-model="formData.username"/>
-          </div>
-          <div class="flex flex-col sm:flex-row justify-between gap-4">
-            <div class="grid gap-2">
-              <Label id="first_name" class="text-left">First Name</Label>
-              <Input id="first_name" type="text" placeholder="John" required
-                     v-model="formData.firstName"/>
-            </div>
-            <div class="grid gap-2">
-              <Label id="last_name" class="text-left">Last Name</Label>
-              <Input id="last_name" type="text" placeholder="Doe" required
-                     v-model="formData.lastName"/>
-            </div>
-          </div>
-          <div class="grid gap-2">
             <Label id="email" class="text-left">Email</Label>
-            <Input id="email" type="email" placeholder="johndoe19@example.com" required
-                   v-model="formData.email"/>
+            <Input id="email" type="email"
+                   placeholder="johndoe19@example.com"
+                   required
+                   v-model="formData.email"
+                   :class="{'border-red-500': serverError}"/>
+            <ul class="text-sm text-left text-red-500 pl-4" v-if="formErrors?.email.length">
+              <li class="list-disc" v-for="err in formErrors.email" :key="err">
+                {{err}}
+              </li>
+            </ul>
           </div>
 
           <div class="grid gap-2">
@@ -78,8 +78,14 @@ async function signup(){
               placeholder="*****"
               autocomplete
               required
+              :class="{'border-red-500': serverError}"
               v-model="formData.confirmPassword"
             />
+            <ul class="text-sm text-left text-red-500 pl-4" v-if="formErrors?.password.length">
+              <li class="list-disc" v-for="err in formErrors.password" :key="err">
+                {{err}}
+              </li>
+            </ul>
           </div>
           <Button type="submit" class="w-full"> Register</Button>
           <!-- <Button variant="outline" class="w-full"> Login with Google </Button> -->

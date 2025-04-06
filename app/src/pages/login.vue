@@ -55,7 +55,7 @@ watchDebounced(
                    :class="{'border-red-500': serverError}"
                    v-model="formData.email"
             />
-            <ul class="text-sm text-left text-red-500" v-if="formErrors?.email.length">
+            <ul class="text-sm text-left text-red-500 pl-4" v-if="formErrors?.email.length">
               <li class="list-disc" v-for="err in formErrors.email" :key="err">
                 {{err}}
               </li>
@@ -72,13 +72,13 @@ watchDebounced(
                    required
                    :class="{'border-red-500': serverError}"
                    v-model="formData.password" />
-            <ul class="text-sm text-left text-red-500" v-if="formErrors?.password.length">
+            <ul class="text-sm text-left text-red-500 pl-4" v-if="formErrors?.password.length">
               <li class="list-disc" v-for="err in formErrors.password" :key="err">
                 {{err}}
               </li>
             </ul>
           </div>
-          <ul class="text-sm text-left text-red-500" v-if="serverError">
+          <ul class="text-sm text-left text-red-500 pl-4" v-if="serverError">
             <li class="list-disc">
               {{serverError}}
             </li>
