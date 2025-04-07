@@ -22,7 +22,7 @@ export function folderTreeConstructor(folders: Folders): FolderTreeNode[] {
   let iteration = 0;
   const retries = 20; // The number of iterations in the worst case.
 
-  while (folders.length > 0) {
+  while (folders.length > 0 && i < folders.length) {
     const folder = folders[i];
 
     if (folder.folder === null) break;
