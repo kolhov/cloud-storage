@@ -19,13 +19,22 @@ export function folderTreeConstructor(folders: Folders): FolderTreeNode[] {
   }
 
   let i = 0;
-  let iteration = 0;
-  const retries = 20; // The number of iterations in the worst case.
+  let iterationCounter = 0;
+  const retries = 20;       // The number of iterations in the worst case.
 
-  while (folders.length > 0 && i < folders.length) {
+  while (folders.length > 0) {
+    if (i >= folders.length) {
+      i = 0;
+      iterationCounter++;
+      if (iterationCounter === retries){
+        console.log("There is orphaned folders or too many folders")
+        break;
+      }
+    }
+
     const folder = folders[i];
 
-    if (folder.folder === null) break;
+    if (!folder || folder.folder === null) break;
     if (folder.folder in memo) {
       const indexes = memo[folder.folder];
       if (indexes.length === 1) {
@@ -46,14 +55,6 @@ export function folderTreeConstructor(folders: Folders): FolderTreeNode[] {
     }
 
     i++;
-    if (i === folders.length) {
-      i = 0;
-      iteration++;
-    }
-    if (iteration === retries){
-      console.log("There is orphaned folders or too many folders")
-      break;
-    }
   }
 
   return tree;

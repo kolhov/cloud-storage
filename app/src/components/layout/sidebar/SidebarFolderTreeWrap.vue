@@ -2,18 +2,23 @@
 import SidebarFolderTree from '@/components/layout/sidebar/SidebarFolderTree.vue'
 import type { FolderTreeNode } from '@/types/folder.tree.type.ts'
 import { useStorageStore } from '@/stores/storageStore.ts'
-import { onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/authStore.ts'
+import { watchDebounced } from '@vueuse/core'
 
 const props = defineProps<{
   items: FolderTreeNode[] | null
 }>()
 
+const {foldersTree} = storeToRefs(useStorageStore());
+
 const {user} = storeToRefs(useAuthStore());
-watch(() => user.value,(user) => {
-  if (user) useStorageStore().refreshFoldersTree();
-})
+watchDebounced(() => user.value,(user) => {
+  if (user && !foldersTree.value) {
+    console.log(1)
+    useStorageStore().refreshFoldersTree();
+  }
+}, {debounce: 500});
 </script>
 
 <template>
